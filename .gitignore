@@ -1,0 +1,6 @@
+# Dotnet Artifacts
+bin/
+obj/
+
+# Identity Server Keys
+*.rsa
