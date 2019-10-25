@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace OpenIDProvider
+namespace WingedKeys
 {
     public class Startup
     {
@@ -31,7 +31,7 @@ namespace OpenIDProvider
             services.AddIdentityServer(options =>
                     {
                         // This is needed because we are accessing the server through its Docker DNS name
-                        options.IssuerUri = "https://openid:5050";
+                        options.IssuerUri = "https://winged-keys:5050";
                     })
                 .AddInMemoryIdentityResources(Config.GetIdentityResources())
                 .AddInMemoryApiResources(Config.GetApis())
