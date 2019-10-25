@@ -41,7 +41,7 @@ steps:
   #
   # Add beanstalk deployment manifest to distribution
   #
-  - script: cp aws-windows-deployment-manifest-is.json $(Build.SourcesDirectory)/src/WingedKeys/dist/aws-windows-deployment-manifest.json
+  - script: cp aws-windows-deployment-manifest.json $(Build.SourcesDirectory)/src/WingedKeys/dist/aws-windows-deployment-manifest.json
     displayName: "Script: add beanstalk deployment manifest to distribution"
   #
   # Install typescript for sonarcloud
