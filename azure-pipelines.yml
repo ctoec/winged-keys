@@ -16,15 +16,14 @@ steps:
   # Setup sonarcloud authentication 
   #
 #
-#  - task: SonarCloudPrepare@1
-#    inputs:
-#      SonarCloud: "sonar-cloud-ctoec"
-#      organization: "ctoec"
-#      scannerMode: "MSBuild"
-#      projectKey: "winged-keys"
-#      extraProperties: |
-#        sonar.exclusions=**/src/**
-#        sonar.coverage.exclusions=**/**
+  - task: SonarCloudPrepare@1
+    inputs:
+      SonarCloud: "sonar-cloud-ctoec"
+      organization: "ctoec"
+      scannerMode: "MSBuild"
+      projectKey: "winged-keys"
+      extraProperties: |
+        sonar.coverage.exclusions=**/**
   #
   # Download dependencies
   #
@@ -46,15 +45,15 @@ steps:
   #
   # Install typescript for sonarcloud
   #
-#  - script: npm install typescript --loglevel verbose
-#    displayName: "Script: npm install typescript"
+  - script: npm install typescript --loglevel verbose
+    displayName: "Script: npm install typescript"
   #
   # Perform & publish static code analysis to sonarcloud
   #
-#  - task: SonarCloudAnalyze@1
-#  - task: SonarCloudPublish@1
-#    inputs:
-#      pollingTimeoutSec: "300"
+  - task: SonarCloudAnalyze@1
+  - task: SonarCloudPublish@1
+    inputs:
+      pollingTimeoutSec: "300"
   #
   # Zip app runtime release
   #
