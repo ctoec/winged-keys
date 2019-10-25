@@ -49,6 +49,11 @@ steps:
   - script: cp aws-windows-deployment-manifest.json $(Build.SourcesDirectory)/src/WingedKeys/dist/aws-windows-deployment-manifest.json
     displayName: "Script: add beanstalk deployment manifest to distribution"
   #
+  # Add ebextensions to distribution
+  #
+  - script: cp -r ebextensions $(Build.SourcesDirectory)/src/WingedKeys/dist/.ebextensions
+    displayName: "Script: add ebextensions to distribution"
+  #
   # Install typescript for sonarcloud
   #
   - script: npm install typescript --loglevel verbose
