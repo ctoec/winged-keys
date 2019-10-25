@@ -27,7 +27,7 @@ steps:
       SonarCloud: "sonar-cloud-ctoec"
       organization: "ctoec"
       scannerMode: "MSBuild"
-      projectKey: "winged-keys"
+      projectKey: "ctoec_winged-keys"
       extraProperties: |
         sonar.coverage.exclusions=**/**
   #
