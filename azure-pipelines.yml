@@ -43,17 +43,14 @@ steps:
   - script: dotnet publish "$(Build.SourcesDirectory)/src/WingedKeys/WingedKeys.csproj" --output "$(Build.SourcesDirectory)/src/WingedKeys/dist" --configuration Release --no-restore
     displayName: "Script: dotnet publish"
   #
-  # Add beanstalk deployment manifest to distribution
+  # Add installer files to distribution
   #
-  - script: cp aws-windows-deployment-manifest.json $(Build.SourcesDirectory)/src/WingedKeys/dist/aws-windows-deployment-manifest.json
-    displayName: "Script: add beanstalk deployment manifest to distribution"
-  #
-  # Add ebextensions & scripts to distribution
-  #
+  - script: cp installer/aws-windows-deployment-manifest.json $(Build.SourcesDirectory)/src/WingedKeys/dist/aws-windows-deployment-manifest.json
+    displayName: "Script: add installer manifest to distribution"
   - script: cp -r installer/ebextensions $(Build.SourcesDirectory)/src/WingedKeys/dist/ebextensions
-    displayName: "Script: add ebextensions to distribution"
+    displayName: "Script: add installer ebextensions to distribution"
   - script: cp -r installer/scripts $(Build.SourcesDirectory)/src/WingedKeys/dist/installer
-    displayName: "Script: add installer to distribution"
+    displayName: "Script: add installer scripts to distribution"
   #
   # Install typescript for sonarcloud
   #
