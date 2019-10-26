@@ -10,8 +10,8 @@
                 "iisWebSite": "Default Web Site"
             },
             "scripts": {
-                "preInstall": {
-                    "file": "installer/preinstall.ps1"
+                "postInstall": {
+                    "file": "installer\postinstall.ps1"
                 }
             }
         }
