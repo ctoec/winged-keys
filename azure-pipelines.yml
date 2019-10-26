@@ -21,7 +21,6 @@ steps:
   #
   # Setup sonarcloud authentication 
   #
-#
   - task: SonarCloudPrepare@1
     inputs:
       SonarCloud: "sonar-cloud-ctoec"
@@ -49,11 +48,11 @@ steps:
   - script: cp aws-windows-deployment-manifest.json $(Build.SourcesDirectory)/src/WingedKeys/dist/aws-windows-deployment-manifest.json
     displayName: "Script: add beanstalk deployment manifest to distribution"
   #
-  # Add ebextensions to distribution
+  # Add ebextensions & scripts to distribution
   #
-  #- script: cp -r ebextensions $(Build.SourcesDirectory)/src/WingedKeys/dist/.ebextensions
-  #  displayName: "Script: add ebextensions to distribution"
-  - script: cp -r installer $(Build.SourcesDirectory)/src/WingedKeys/dist/installer
+  - script: cp -r installer/ebextensions $(Build.SourcesDirectory)/src/WingedKeys/dist/ebextensions
+    displayName: "Script: add ebextensions to distribution"
+  - script: cp -r installer/scripts $(Build.SourcesDirectory)/src/WingedKeys/dist/installer
     displayName: "Script: add installer to distribution"
   #
   # Install typescript for sonarcloud
