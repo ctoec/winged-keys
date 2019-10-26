@@ -11,7 +11,7 @@
             },
             "scripts": {
                 "postInstall": {
-                    "file": "C:\\inetpub\\AspNetCoreWebApps\\winged-keys-appinstaller\\postinstall.ps1"
+                    "file": "C:\\inetpub\\AspNetCoreWebApps\\winged-keys-app\\installer\\postinstall.ps1"
                 }
             }
         }
