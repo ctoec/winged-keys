@@ -51,8 +51,8 @@ steps:
   #
   # Add ebextensions to distribution
   #
-  - script: cp -r ebextensions $(Build.SourcesDirectory)/src/WingedKeys/dist/.ebextensions
-    displayName: "Script: add ebextensions to distribution"
+  #- script: cp -r ebextensions $(Build.SourcesDirectory)/src/WingedKeys/dist/.ebextensions
+  #  displayName: "Script: add ebextensions to distribution"
   #
   # Install typescript for sonarcloud
   #

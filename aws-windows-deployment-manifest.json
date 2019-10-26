@@ -8,6 +8,11 @@
                 "appBundle": "site.zip",
                 "iisPath": "/",
                 "iisWebSite": "Default Web Site"
+            },
+            "scripts": {
+                "preInstall": {
+                    "file": "installer/preinstall.ps1"
+                }
             }
         }
         ]
