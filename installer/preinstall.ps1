@@ -1,1 +1,1 @@
-New-Item c:\cfn\preinstall.txt
+New-Item c:\cfn\preinstall.txt 
