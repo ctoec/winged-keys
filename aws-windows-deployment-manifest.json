@@ -12,7 +12,7 @@
             "scripts": {
                 "preInstall": {
                     "file": "installer\\preinstall.ps1"
-                }
+                },
                 "postInstall": {
                     "file": "C:\\inetpub\\AspNetCoreWebApps\\winged-keys-app\\installer\\postinstall.ps1"
                 }
