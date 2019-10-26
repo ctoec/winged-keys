@@ -1,1 +1,1 @@
-New-Item c:\cfn\postinstall.txt
+New-Item c:/cfn/postinstall.txt
