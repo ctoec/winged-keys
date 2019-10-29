@@ -47,15 +47,10 @@ steps:
   #
   - script: cp installer/aws-windows-deployment-manifest.json $(Build.SourcesDirectory)/src/WingedKeys/dist/aws-windows-deployment-manifest.json
     displayName: "Script: add installer manifest to distribution"
+  - script: cp installer/iis/web.config $(Build.SourcesDirectory)/src/WingedKeys/dist/web.config
+    displayName: "Script: add installer manifest to distribution"
   - script: cp -r installer $(Build.SourcesDirectory)/src/WingedKeys/dist/installer
-    displayName: "Script: add installer scripts to distribution"
-
-#  - script: cp -r installer/ebextensions $(Build.SourcesDirectory)/src/WingedKeys/dist/ebextensions
-#    displayName: "Script: add installer ebextensions to distribution"
-#  - script: cp installer/iis $(Build.SourcesDirectory)/src/WingedKeys/dist/iis
-#    displayName: "Script: add installer iis to distribution"
-#  - script: cp -r installer/scripts $(Build.SourcesDirectory)/src/WingedKeys/dist/installer
-#    displayName: "Script: add installer scripts to distribution"
+    displayName: "Script: add installer files to distribution"
   #
   # Install typescript for sonarcloud
   #
