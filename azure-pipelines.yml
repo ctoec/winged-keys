@@ -45,10 +45,10 @@ steps:
   #
   # Add installer files to distribution
   #
-  - script: cp installer/aws-windows-deployment-manifest.json $(Build.SourcesDirectory)/src/WingedKeys/dist/aws-windows-deployment-manifest.json
+  - script: cp installer/aws-windows-deployment-manifest.json $(Build.SourcesDirectory)/src/WingedKeys/dist
     displayName: "Script: add installer manifest to distribution"
-  - script: cp installer/iis/web.config $(Build.SourcesDirectory)/src/WingedKeys/dist/web.config
-    displayName: "Script: add installer manifest to distribution"
+  - script: cp installer/iis/web.config $(Build.SourcesDirectory)/src/WingedKeys/dist
+    displayName: "Script: add installer web.config to distribution"
   - script: cp -r installer $(Build.SourcesDirectory)/src/WingedKeys/dist/installer
     displayName: "Script: add installer files to distribution"
   #
