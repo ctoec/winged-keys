@@ -7,6 +7,12 @@ pool:
 
 steps:
   - task: UseDotNet@2
+    displayName: 'Use .NET Core sdk (for SonarCloud)'
+    inputs:
+      packageType: sdk
+      version: 2.2.203
+      installationPath: $(Agent.ToolsDirectory)/dotnet
+  - task: UseDotNet@2
     displayName: 'Use .NET Core sdk'
     inputs:
       packageType: sdk
@@ -15,16 +21,14 @@ steps:
   #
   # Setup sonarcloud authentication 
   #
-#
-#  - task: SonarCloudPrepare@1
-#    inputs:
-#      SonarCloud: "sonar-cloud-ctoec"
-#      organization: "ctoec"
-#      scannerMode: "MSBuild"
-#      projectKey: "winged-keys"
-#      extraProperties: |
-#        sonar.exclusions=**/src/**
-#        sonar.coverage.exclusions=**/**
+  - task: SonarCloudPrepare@1
+    inputs:
+      SonarCloud: "sonar-cloud-ctoec"
+      organization: "ctoec"
+      scannerMode: "MSBuild"
+      projectKey: "ctoec_winged-keys"
+      extraProperties: |
+        sonar.coverage.exclusions=**/**
   #
   # Download dependencies
   #
@@ -39,22 +43,26 @@ steps:
   - script: dotnet publish "$(Build.SourcesDirectory)/src/WingedKeys/WingedKeys.csproj" --output "$(Build.SourcesDirectory)/src/WingedKeys/dist" --configuration Release --no-restore
     displayName: "Script: dotnet publish"
   #
-  # Add beanstalk deployment manifest to distribution
+  # Add installer files to distribution
   #
-  - script: cp aws-windows-deployment-manifest-is.json $(Build.SourcesDirectory)/src/WingedKeys/dist/aws-windows-deployment-manifest.json
-    displayName: "Script: add beanstalk deployment manifest to distribution"
+  - script: cp installer/aws-windows-deployment-manifest.json $(Build.SourcesDirectory)/src/WingedKeys/dist
+    displayName: "Script: add installer manifest to distribution"
+  - script: cp installer/iis/web.config $(Build.SourcesDirectory)/src/WingedKeys/dist
+    displayName: "Script: add installer web.config to distribution"
+  - script: cp -r installer $(Build.SourcesDirectory)/src/WingedKeys/dist/installer
+    displayName: "Script: add installer files to distribution"
   #
   # Install typescript for sonarcloud
   #
-#  - script: npm install typescript --loglevel verbose
-#    displayName: "Script: npm install typescript"
+  - script: npm install typescript --loglevel verbose
+    displayName: "Script: npm install typescript"
   #
   # Perform & publish static code analysis to sonarcloud
   #
-#  - task: SonarCloudAnalyze@1
-#  - task: SonarCloudPublish@1
-#    inputs:
-#      pollingTimeoutSec: "300"
+  - task: SonarCloudAnalyze@1
+  - task: SonarCloudPublish@1
+    inputs:
+      pollingTimeoutSec: "300"
   #
   # Zip app runtime release
   #
