@@ -5,22 +5,28 @@
 pool:
   vmImage: "ubuntu-latest"
 
-steps:
+jobs:
+#
+# SonarCloud - Static Code Analysis
+#
+- job: sonarcloud_analysis
+  displayName: 'SonarCloud Analysis'
+
+  steps:
   - task: UseDotNet@2
     displayName: 'Use .NET Core sdk (for SonarCloud)'
     inputs:
       packageType: sdk
       version: 2.2.203
       installationPath: $(Agent.ToolsDirectory)/dotnet
+
   - task: UseDotNet@2
     displayName: 'Use .NET Core sdk'
     inputs:
       packageType: sdk
       version: 3.0.100
       installationPath: $(Agent.ToolsDirectory)/dotnet
-  #
-  # Setup sonarcloud authentication 
-  #
+
   - task: SonarCloudPrepare@1
     inputs:
       SonarCloud: "sonar-cloud-ctoec"
@@ -29,43 +35,46 @@ steps:
       projectKey: "ctoec_winged-keys"
       extraProperties: |
         sonar.coverage.exclusions=**/**
-  #
-  # Download dependencies
-  #
+
+  - script: npm install typescript --loglevel verbose
+    displayName: "Script: npm install typescript"
+
   - task: DotNetCoreCLI@2
-    displayName: "Script: dotnet restore"
+    displayName: "Script: build Winged Keys"
     inputs:
-      command: restore
+      command: build
       projects: "$(Build.SourcesDirectory)/src/WingedKeys/WingedKeys.csproj"
-  #
-  # Create an optimized production build
-  #
-  - script: dotnet publish "$(Build.SourcesDirectory)/src/WingedKeys/WingedKeys.csproj" --output "$(Build.SourcesDirectory)/src/WingedKeys/dist" --configuration Release --no-restore
+
+  - task: SonarCloudAnalyze@1
+
+  - task: SonarCloudPublish@1
+    inputs:
+      pollingTimeoutSec: "300"
+
+#
+# Package Release - build, zip & publish
+#
+- job: package_release
+  displayName: 'Build and Package Release'
+
+  steps:
+  - task: UseDotNet@2
+    displayName: 'Use .NET Core sdk'
+    inputs:
+      packageType: sdk
+      version: 3.0.100
+      installationPath: $(Agent.ToolsDirectory)/dotnet
+
+  - script: dotnet publish "$(Build.SourcesDirectory)/src/WingedKeys/WingedKeys.csproj" --output "$(Build.SourcesDirectory)/src/WingedKeys/dist" --configuration Release
     displayName: "Script: dotnet publish"
-  #
-  # Add installer files to distribution
-  #
+
   - script: cp installer/aws-windows-deployment-manifest.json $(Build.SourcesDirectory)/src/WingedKeys/dist
     displayName: "Script: add installer manifest to distribution"
   - script: cp installer/iis/web.config $(Build.SourcesDirectory)/src/WingedKeys/dist
     displayName: "Script: add installer web.config to distribution"
   - script: cp -r installer $(Build.SourcesDirectory)/src/WingedKeys/dist/installer
     displayName: "Script: add installer files to distribution"
-  #
-  # Install typescript for sonarcloud
-  #
-  - script: npm install typescript --loglevel verbose
-    displayName: "Script: npm install typescript"
-  #
-  # Perform & publish static code analysis to sonarcloud
-  #
-  - task: SonarCloudAnalyze@1
-  - task: SonarCloudPublish@1
-    inputs:
-      pollingTimeoutSec: "300"
-  #
-  # Zip app runtime release
-  #
+
   - task: ArchiveFiles@2
     displayName: "Archive Files"
     inputs:
@@ -75,13 +84,10 @@ steps:
       #tarCompression: 'gz' # Optional. Options: gz, bz2, xz, none
       archiveFile: "$(Build.ArtifactStagingDirectory)/winged-keys-app.zip"
       replaceExistingArchive: true
-  #
-  # Publish artifact to dropbox - winged-keys-app
-  #
+
   - task: PublishBuildArtifacts@1
     displayName: "Publish Artifacts: winged-keys-app"
     inputs:
       pathToPublish: "$(Build.ArtifactStagingDirectory)/winged-keys-app.zip"
       artifactName: winged-keys-app
-
 
