@@ -65,13 +65,7 @@ jobs:
       version: 3.0.100
       installationPath: $(Agent.ToolsDirectory)/dotnet
 
-  - task: DotNetCoreCLI@2
-    displayName: "Script: dotnet restore"
-    inputs:
-      command: restore
-      projects: "$(Build.SourcesDirectory)/src/WingedKeys/WingedKeys.csproj"
-
-  - script: dotnet publish "$(Build.SourcesDirectory)/src/WingedKeys/WingedKeys.csproj" --output "$(Build.SourcesDirectory)/src/WingedKeys/dist" --configuration Release --no-restore
+  - script: dotnet publish "$(Build.SourcesDirectory)/src/WingedKeys/WingedKeys.csproj" --output "$(Build.SourcesDirectory)/src/WingedKeys/dist" --configuration Release
     displayName: "Script: dotnet publish"
 
   - script: cp installer/aws-windows-deployment-manifest.json $(Build.SourcesDirectory)/src/WingedKeys/dist
