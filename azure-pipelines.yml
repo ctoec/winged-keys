@@ -34,6 +34,7 @@ jobs:
       scannerMode: "MSBuild"
       projectKey: "ctoec_winged-keys"
       extraProperties: |
+        sonar.exclusions=**/Migrations/**,**/DbInitializer.cs
         sonar.coverage.exclusions=**/**
 
   - script: npm install typescript --loglevel verbose
