@@ -69,8 +69,11 @@ jobs:
   - script: dotnet tool install --tool-path $(Agent.ToolsDirectory) dotnet-ef --version 3.0.0
     displayName: "Install EntityFramework"
 
-  - script: export ConnectionStrings__WingedKeys=xxx && $(Agent.ToolsDirectory)/dotnet-ef --verbose migrations script --idempotent --output $(Build.ArtifactStagingDirectory)/winged-keys-db.sql --context ConfigurationDbContext --project src/WingedKeys
-    displayName: "Generate migration script"
+  - script: export ConnectionStrings__WingedKeys=xxx && $(Agent.ToolsDirectory)/dotnet-ef --verbose migrations script --idempotent --output $(Build.ArtifactStagingDirectory)/winged-keys-persisted-db.sql --context PersistedGrantDbContext --project src/WingedKeys
+    displayName: "Generate Persisted migration script"
+
+  - script: export ConnectionStrings__WingedKeys=xxx && $(Agent.ToolsDirectory)/dotnet-ef --verbose migrations script --idempotent --output $(Build.ArtifactStagingDirectory)/winged-keys-configuration-db.sql --context ConfigurationDbContext --project src/WingedKeys
+    displayName: "Generate Configuration migration script"
 
   - script: dotnet publish "$(Build.SourcesDirectory)/src/WingedKeys/WingedKeys.csproj" --output "$(Build.SourcesDirectory)/src/WingedKeys/dist" --configuration Release
     displayName: "Script: dotnet publish"
@@ -99,8 +102,13 @@ jobs:
       artifactName: winged-keys-app
 
   - task: PublishBuildArtifacts@1
-    displayName: "Publish Artifacts: winged-keys-db"
+    displayName: "Publish Artifacts: winged-keys-persisted-db"
     inputs:
-      pathToPublish: "$(Build.ArtifactStagingDirectory)/winged-keys-db.sql"
-      artifactName: winged-keys-db
+      pathToPublish: "$(Build.ArtifactStagingDirectory)/winged-keys-persisted-db.sql"
+      artifactName: winged-keys-persisted-db
 
+  - task: PublishBuildArtifacts@1
+    displayName: "Publish Artifacts: winged-keys-configuration-db"
+    inputs:
+      pathToPublish: "$(Build.ArtifactStagingDirectory)/winged-keys-configuration-db.sql"
+      artifactName: winged-keys-configuration-db

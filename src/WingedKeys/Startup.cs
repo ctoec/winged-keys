@@ -11,6 +11,7 @@ using Microsoft.EntityFrameworkCore.SqlServer;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.IdentityModel.Logging;
 
 namespace WingedKeys
 {
@@ -21,7 +22,6 @@ namespace WingedKeys
 
 		private readonly string WingedKeysConnectionString;
 		private readonly string MigrationsAssembly;
-		private readonly string Issuer;
 
 		public Startup(IWebHostEnvironment environment, IConfiguration configuration)
 		{
@@ -30,7 +30,6 @@ namespace WingedKeys
 
 			WingedKeysConnectionString = Configuration.GetConnectionString("WINGEDKEYS");
 			MigrationsAssembly = typeof(Startup).GetTypeInfo().Assembly.GetName().Name;
-			Issuer = Configuration.GetValue<string>("Issuer");
 		}
 
 		// This method gets called by the runtime. Use this method to add services to the container.
@@ -55,7 +54,20 @@ namespace WingedKeys
 
 			// Identity Server
 			var identityServerServices = services
-				.AddIdentityServer(options => { options.IssuerUri = Issuer; })
+				.AddIdentityServer(options =>
+				{
+					var baseHost = Configuration.GetValue<string>("BaseUri");
+					var dockerDns = Configuration.GetValue<string>("DockerDns");
+					if (dockerDns != null)
+					{
+						options.PublicOrigin = baseHost;
+						options.IssuerUri = dockerDns;
+					}
+					if (Environment.IsDevelopment())
+					{
+						IdentityModelEventSource.ShowPII = true;
+					}
+				})
 				.AddConfigurationStore(options =>
 				{
 					options.ConfigureDbContext = b =>
@@ -77,11 +89,14 @@ namespace WingedKeys
 					options.EnableTokenCleanup = true;
 				});
 
+				// !!! DANGEROUS -- THERE BE DRAGONS !!!
+				identityServerServices.AddTestUsers(new Config(Configuration).GetUsers());
+				identityServerServices.AddDeveloperSigningCredential();
 				if (Environment.IsDevelopment())
 				{
-					identityServerServices.AddTestUsers(new Config(Configuration).GetUsers());
-					identityServerServices.AddDeveloperSigningCredential();
-				}				
+					
+				}
+				// !!! END !!!
 		}
 
 		// This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

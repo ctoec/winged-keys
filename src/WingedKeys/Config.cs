@@ -8,6 +8,7 @@ using IdentityServer4;
 using IdentityServer4.Models;
 using IdentityServer4.Test;
 using System;
+using System.Linq;
 using System.Collections.Generic;
 using System.Security.Claims;
 using Microsoft.Extensions.Configuration;
@@ -82,10 +83,16 @@ namespace WingedKeys
 
 		public IEnumerable<Client> GetClients()
 		{
-			var redirectUris = Configuration.GetValue<string>("RedirectURIs");
-			var postLogoutRedirectUris = Configuration.GetValue<string>("PostLogoutRedirectURIs");
-			var allowedCorsOrigins = Configuration.GetValue<string>("AllowedCorsOrigins");
 			var accessTokenLifetime = Configuration.GetValue<string>("AccessTokenLifetime");
+			var baseUri = Configuration.GetValue<string>("BaseUri");
+			var clientUrisRaw = Configuration.GetValue<string>("ClientUris");
+			var clientUris = clientUrisRaw.Split(",", StringSplitOptions.RemoveEmptyEntries);
+
+			var redirectEndpoint = "/login/callback";
+
+			var allowedCorsOrigins = clientUris;
+			var postLogoutRedirectUris = clientUris;
+			string[] redirectUris = clientUris.Select(uri => $"{uri}{redirectEndpoint}").ToArray();
 
 			return new List<Client>
 			{
@@ -97,9 +104,9 @@ namespace WingedKeys
 					AllowedGrantTypes = GrantTypes.Code,
 					RequireClientSecret = false,
 
-					RedirectUris =           { redirectUris },
-					PostLogoutRedirectUris = { postLogoutRedirectUris },
-					AllowedCorsOrigins =     { allowedCorsOrigins },
+					RedirectUris =           redirectUris,
+					PostLogoutRedirectUris = postLogoutRedirectUris,
+					AllowedCorsOrigins =     allowedCorsOrigins,
 
 					AccessTokenLifetime = Int32.Parse(accessTokenLifetime),
 
@@ -110,7 +117,7 @@ namespace WingedKeys
 						"hedwig_backend"
 					},
 
-					AllowOfflineAccess = true
+					AllowOfflineAccess = true,
 				}
 			};
 		}
