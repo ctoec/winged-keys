@@ -103,3 +103,4 @@ jobs:
     inputs:
       pathToPublish: "$(Build.ArtifactStagingDirectory)/winged-keys-db.sql"
       artifactName: winged-keys-db
+
