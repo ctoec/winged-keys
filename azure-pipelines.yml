@@ -66,6 +66,12 @@ jobs:
       version: 3.0.100
       installationPath: $(Agent.ToolsDirectory)/dotnet
 
+  - script: dotnet tool install --tool-path $(Agent.ToolsDirectory) dotnet-ef --version 3.0.0
+    displayName: "Install EntityFramework"
+
+  - script: export ConnectionStrings__WingedKeys=xxx && $(Agent.ToolsDirectory)/dotnet-ef --verbose migrations script --idempotent --output $(Build.ArtifactStagingDirectory)/wingkeys-db.sql --context ConfigurationDbContext --project src/WingedKeys
+    displayName: "Generate migration script"
+
   - script: dotnet publish "$(Build.SourcesDirectory)/src/WingedKeys/WingedKeys.csproj" --output "$(Build.SourcesDirectory)/src/WingedKeys/dist" --configuration Release
     displayName: "Script: dotnet publish"
 
