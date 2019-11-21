@@ -42,27 +42,27 @@ namespace WingedKeys
 		}
 
 		public static IHostBuilder CreateHostBuilder(string[] args) =>
-				Host.CreateDefaultBuilder(args)
-					.ConfigureLogging((context, logging) =>
+			Host.CreateDefaultBuilder(args)
+				.ConfigureLogging((context, logging) =>
+				{
+					logging.ClearProviders();
+
+					logging.AddConfiguration(context.Configuration.GetSection("Logging"));
+					logging.AddConsole();
+					logging.AddDebug();
+
+					var environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
+					var isDevelopment = environment == Microsoft.Extensions.Hosting.Environments.Development;
+					if (!isDevelopment)
 					{
-						logging.ClearProviders();
+						logging.AddAWSProvider();
+						logging.AddEventLog();
+					}
 
-						logging.AddConfiguration(context.Configuration.GetSection("Logging"));
-						logging.AddConsole();
-						logging.AddDebug();
-
-						var environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
-						var isDevelopment = environment == Microsoft.Extensions.Hosting.Environments.Development;
-						if (!isDevelopment)
-						{
-							logging.AddAWSProvider();
-							logging.AddEventLog();
-						}
-
-					})
-					.ConfigureWebHostDefaults(webBuilder =>
-					{
-						webBuilder.UseStartup<Startup>();
-					});
+				})
+				.ConfigureWebHostDefaults(webBuilder =>
+				{
+					webBuilder.UseStartup<Startup>();
+				});
 	}
 }
