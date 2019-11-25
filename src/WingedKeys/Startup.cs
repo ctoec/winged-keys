@@ -1,20 +1,23 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
 using System.Text;
-using System.IO;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.SqlServer;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Logging;
-using System.Security.Cryptography.X509Certificates;
+using WingedKeys.Data;
+using WingedKeys.Models;
 
 namespace WingedKeys
 {
@@ -52,8 +55,27 @@ namespace WingedKeys
 				);
 			});
 
+			services.AddDbContext<WingedKeysContext>(options =>
+				options.UseSqlServer(WingedKeysConnectionString)
+			);
+
 			// MVC
 			services.AddMvc(option => option.EnableEndpointRouting = false);
+
+			 services.AddIdentity<ApplicationUser, IdentityRole>(config =>
+				{
+						config.SignIn.RequireConfirmedEmail = true;
+						config.User.RequireUniqueEmail = true;
+						// Password requirements
+						config.Password.RequireDigit = false;
+						config.Password.RequiredLength = 6;
+						config.Password.RequiredUniqueChars = 1;
+						config.Password.RequireLowercase = false;
+						config.Password.RequireNonAlphanumeric = false;
+						config.Password.RequireUppercase = false;
+				})
+				.AddEntityFrameworkStores<WingedKeysContext>()
+				.AddDefaultTokenProviders();
 
 			// Identity Server
 			var identityServerServices = services
@@ -93,11 +115,9 @@ namespace WingedKeys
 
 					// this enables automatic token cleanup. this is optional.
 					options.EnableTokenCleanup = true;
-				});
+				})
+				.AddAspNetIdentity<ApplicationUser>();
 
-				// !!! DANGEROUS -- THERE BE DRAGONS !!!
-				identityServerServices.AddTestUsers(new Config(Configuration).GetUsers());
-				// !!! END !!!
 				if (Environment.IsDevelopment())
 				{
 					identityServerServices.AddDeveloperSigningCredential();
@@ -105,7 +125,7 @@ namespace WingedKeys
 				else
 				{
 					var currentDirectory = Path.GetDirectoryName(
-      			System.Reflection.Assembly.GetExecutingAssembly().GetName().CodeBase
+						System.Reflection.Assembly.GetExecutingAssembly().GetName().CodeBase
 					).Replace("file:\\\\", "");
 					var certificateFileName = Configuration.GetValue<string>("CertificateFileName");
 					var certificatePath = Path.Join(currentDirectory, certificateFileName);
@@ -113,6 +133,8 @@ namespace WingedKeys
 					var certificate = new X509Certificate2(certificateFileName, certificatePassword, X509KeyStorageFlags.MachineKeySet);
 					identityServerServices.AddSigningCredential(certificate);
 				}
+
+				services.AddAuthentication();
 		}
 
 		// This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -124,9 +146,14 @@ namespace WingedKeys
 				app.UseCors("AllowAll");
 			}
 
+			app.UseRouting();
 			app.UseStaticFiles();
 			app.UseIdentityServer();
-			app.UseMvcWithDefaultRoute();
+			app.UseAuthorization();
+			app.UseEndpoints(endpoints =>
+			{
+				endpoints.MapDefaultControllerRoute();
+			});
 		}
 	}
 }

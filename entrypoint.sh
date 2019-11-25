@@ -13,5 +13,10 @@ until dotnet ef -v database update --context ConfigurationDbContext; do
     sleep 1
 done
 
+echo "waiting for wingedkeys database..."
+until dotnet ef -v database update --context WingedKeysContext; do
+    sleep 1
+done
+
 echo "starting winged keys..."
 dotnet watch run --urls "https://0.0.0.0:5050" -- --context ConfigurationDbContext
