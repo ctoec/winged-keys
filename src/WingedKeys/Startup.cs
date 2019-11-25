@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
+using System.Text;
+using System.IO;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -11,6 +13,8 @@ using Microsoft.EntityFrameworkCore.SqlServer;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.IdentityModel.Logging;
+using System.Security.Cryptography.X509Certificates;
 
 namespace WingedKeys
 {
@@ -21,7 +25,6 @@ namespace WingedKeys
 
 		private readonly string WingedKeysConnectionString;
 		private readonly string MigrationsAssembly;
-		private readonly string Issuer;
 
 		public Startup(IWebHostEnvironment environment, IConfiguration configuration)
 		{
@@ -30,7 +33,6 @@ namespace WingedKeys
 
 			WingedKeysConnectionString = Configuration.GetConnectionString("WINGEDKEYS");
 			MigrationsAssembly = typeof(Startup).GetTypeInfo().Assembly.GetName().Name;
-			Issuer = Configuration.GetValue<string>("Issuer");
 		}
 
 		// This method gets called by the runtime. Use this method to add services to the container.
@@ -55,7 +57,23 @@ namespace WingedKeys
 
 			// Identity Server
 			var identityServerServices = services
-				.AddIdentityServer(options => { options.IssuerUri = Issuer; })
+				.AddIdentityServer(options =>
+				{
+					var baseUri = Configuration.GetValue<string>("BaseUri");
+					var dockerDns = Configuration.GetValue<string>("DockerDns");
+					if (dockerDns != null)
+					{
+						options.IssuerUri = dockerDns;
+					}
+					else
+					{
+						options.PublicOrigin = baseUri;
+					}
+					if (Environment.IsDevelopment())
+					{
+						IdentityModelEventSource.ShowPII = true;
+					}
+				})
 				.AddConfigurationStore(options =>
 				{
 					options.ConfigureDbContext = b =>
@@ -77,11 +95,24 @@ namespace WingedKeys
 					options.EnableTokenCleanup = true;
 				});
 
+				// !!! DANGEROUS -- THERE BE DRAGONS !!!
+				identityServerServices.AddTestUsers(new Config(Configuration).GetUsers());
+				// !!! END !!!
 				if (Environment.IsDevelopment())
 				{
-					identityServerServices.AddTestUsers(new Config(Configuration).GetUsers());
 					identityServerServices.AddDeveloperSigningCredential();
-				}				
+				}
+				else
+				{
+					var currentDirectory = Path.GetDirectoryName(
+      			System.Reflection.Assembly.GetExecutingAssembly().GetName().CodeBase
+					).Replace("file:\\\\", "");
+					var certificateFileName = Configuration.GetValue<string>("CertificateFileName");
+					var certificatePath = Path.Join(currentDirectory, certificateFileName);
+					var certificatePassword = Configuration.GetValue<string>("CertificatePassword");
+					var certificate = new X509Certificate2(certificateFileName, certificatePassword, X509KeyStorageFlags.MachineKeySet);
+					identityServerServices.AddSigningCredential(certificate);
+				}
 		}
 
 		// This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
