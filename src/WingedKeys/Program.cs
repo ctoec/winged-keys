@@ -5,12 +5,14 @@ using System.Linq;
 using System.Threading.Tasks;
 using IdentityServer4.EntityFramework.DbContexts;
 using Microsoft.AspNetCore;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using WingedKeys.Data;
+using WingedKeys.Models;
 
 namespace WingedKeys
 {
@@ -27,9 +29,11 @@ namespace WingedKeys
 				{
 					var persistedGrantDbContext = services.GetRequiredService<PersistedGrantDbContext>();
 					var configurationDbContext = services.GetRequiredService<ConfigurationDbContext>();
+					var wingedKeysContext = services.GetRequiredService<WingedKeysContext>();
+					var userMgr = services.GetRequiredService<UserManager<ApplicationUser>>();
 					var configuration = services.GetRequiredService<IConfiguration>();
 					var config = new Config(configuration);
-					DatabaseInitializer.Initialize(persistedGrantDbContext, configurationDbContext, config);
+					DatabaseInitializer.Initialize(persistedGrantDbContext, configurationDbContext, wingedKeysContext, userMgr, config);
 				}
 				catch (Exception ex)
 				{
