@@ -103,6 +103,7 @@ namespace WingedKeys
 					ClientName = "Hedwig Client",
 					AllowedGrantTypes = GrantTypes.Code,
 					RequireClientSecret = false,
+					RequireConsent = false,
 
 					RedirectUris =           redirectUris,
 					PostLogoutRedirectUris = postLogoutRedirectUris,
