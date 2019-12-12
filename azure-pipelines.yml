@@ -75,6 +75,9 @@ jobs:
   - script: export ConnectionStrings__WingedKeys=xxx && $(Agent.ToolsDirectory)/dotnet-ef --verbose migrations script --idempotent --output $(Build.ArtifactStagingDirectory)/winged-keys-configuration-db.sql --context ConfigurationDbContext --project src/WingedKeys
     displayName: "Generate Configuration migration script"
 
+  - script: export ConnectionStrings__WingedKeys=xxx && $(Agent.ToolsDirectory)/dotnet-ef --verbose migrations script --idempotent --output $(Build.ArtifactStagingDirectory)/winged-keys-wingedkeys-db.sql --context WingedKeysContext --project src/WingedKeys
+    displayName: "Generate Configuration migration script"
+
   - script: dotnet publish "$(Build.SourcesDirectory)/src/WingedKeys/WingedKeys.csproj" --output "$(Build.SourcesDirectory)/src/WingedKeys/dist" --configuration Release
     displayName: "Script: dotnet publish"
 
@@ -112,3 +115,10 @@ jobs:
     inputs:
       pathToPublish: "$(Build.ArtifactStagingDirectory)/winged-keys-configuration-db.sql"
       artifactName: winged-keys-configuration-db
+
+  - task: PublishBuildArtifacts@1
+    displayName: "Publish Artifacts: winged-keys-wingedkeys-db"
+    inputs:
+      pathToPublish: "$(Build.ArtifactStagingDirectory)/winged-keys-wingedkeys-db.sql"
+      artifactName: winged-keys-wingedkeys-db
+
