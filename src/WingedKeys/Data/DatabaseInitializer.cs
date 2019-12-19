@@ -24,7 +24,10 @@ namespace WingedKeys.Data
 			configurationDbContext.Database.EnsureCreated();
 			wingedKeysContext.Database.EnsureCreated();
 
-			DeleteAllData(configurationDbContext, wingedKeysContext);
+			DeleteAllData(
+				configurationDbContext,
+				wingedKeysContext,
+				userMgr);
 
 			AddClients(config, configurationDbContext);
 			AddIdentityResources(config, configurationDbContext);
@@ -99,16 +102,25 @@ namespace WingedKeys.Data
 
 		private static void DeleteAllData(
 			ConfigurationDbContext configurationDbContext,
-			WingedKeysContext wingedKeysContext)
+			WingedKeysContext wingedKeysContext,
+			UserManager<ApplicationUser> userMgr)
 		{
+			// Delete tables that are modified in Config.cs
 			configurationDbContext.Clients.RemoveRange(
 				configurationDbContext.Clients.ToList());
 			configurationDbContext.IdentityResources.RemoveRange(
 				configurationDbContext.IdentityResources.ToList());
 			configurationDbContext.ApiResources.RemoveRange(
 				configurationDbContext.ApiResources.ToList());
-			wingedKeysContext.ApplicationUsers.RemoveRange(
-				wingedKeysContext.ApplicationUsers.ToList());
+
+			// Delete Users and AspNetUserClaims
+			var applicationUsers = wingedKeysContext.ApplicationUsers.ToList();
+			foreach (var user in applicationUsers)
+			{
+				var claims = userMgr.GetClaimsAsync(user).GetAwaiter().GetResult();
+				userMgr.RemoveClaimsAsync(user, claims).GetAwaiter().GetResult();
+			}
+			wingedKeysContext.ApplicationUsers.RemoveRange(applicationUsers);
 		}
 	}
 }
