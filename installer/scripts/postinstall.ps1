@@ -14,6 +14,11 @@ Invoke-Expression -Command:"icacls C:/inetpub/AspNetCoreWebApps/winged-keys-app 
 Invoke-Expression -Command:"icacls C:/inetpub/AspNetCoreWebApps/winged-keys-app"
 
 #
+# Set IIS http to https
+#
+c:/inetpub/ASpNetCoreWebApps/winged-keys-app/installer/scripts/iis-redirect-http-https.bat
+
+#
 # Copy entity framework dll to web root
 #
 Copy-Item -force C:/inetpub/AspNetCoreWebApps/winged-keys-app/installer/lib/ef.dll C:/inetpub/AspNetCoreWebApps/winged-keys-app/ef.dll
