@@ -72,31 +72,68 @@ namespace WingedKeys.Data
 			UserManager<ApplicationUser> userMgr
 		)
 		{
-			var voldemort = new ApplicationUser
+			AddUser(
+				userMgr,
+				"Tom Marvolo Riddle",
+				"Voldemort",
+				"Riddle",
+				"voldemort@hogwarts.uk.co",
+				"voldemort",
+				"thechosenone",
+				"2c0ec653-8829-4aa1-82ba-37c8832bbb88"
+			);
+		}
+
+		private static void AddUser(
+			UserManager<ApplicationUser> userMgr,
+			string fullName,
+			string givenName,
+			string familyName,
+			string username,
+			string email,
+			string password,
+			string id = null)
+		{
+			ApplicationUser user;
+			if (id != null)
 			{
-				Id = "2c0ec653-8829-4aa1-82ba-37c8832bbb88",
-				UserName = "voldemort",
-				Email = "voldemort@hogwarts.uk.co",
-				EmailConfirmed = true
-			};
-			var result = userMgr.CreateAsync(voldemort, "thechosenone").Result;
+				user = new ApplicationUser
+				{
+					Id = id,
+					UserName = username,
+					Email = email,
+					EmailConfirmed = true
+				};
+			}
+			else
+			{
+				user = new ApplicationUser
+				{
+					UserName = username,
+					Email = email,
+					EmailConfirmed = true
+				};
+			}
+			
+			var result = userMgr.CreateAsync(user, password).Result;
 			if (!result.Succeeded)
 			{
-					throw new Exception(result.Errors.First().Description);
+				Console.WriteLine("Unable to create {0}", username);
+				return;
 			}
 
-			result = userMgr.AddClaimsAsync(voldemort, new Claim[]{
-				new Claim(JwtClaimTypes.Name, "Tom Marvolo Riddle"),
-				new Claim(JwtClaimTypes.GivenName, "Voldemort"),
-				new Claim(JwtClaimTypes.FamilyName, "Riddle"),
-				new Claim(JwtClaimTypes.Email, "voldemort@hogwarts.uk.co"),
-				new Claim(JwtClaimTypes.EmailVerified, "true", ClaimValueTypes.Boolean),
-				new Claim("role", "developer")
+			result = userMgr.AddClaimsAsync(user, new Claim[]{
+				new Claim(JwtClaimTypes.Name, fullName),
+				new Claim(JwtClaimTypes.GivenName, givenName),
+				new Claim(JwtClaimTypes.FamilyName, familyName),
+				new Claim(JwtClaimTypes.Email, email),
+				new Claim(JwtClaimTypes.EmailVerified, "true", ClaimValueTypes.Boolean)
 			}).Result;
 
 			if (!result.Succeeded)
 			{
-					throw new Exception(result.Errors.First().Description);
+				Console.WriteLine(result.Errors.First().Description);
+				return;
 			}
 		}
 
