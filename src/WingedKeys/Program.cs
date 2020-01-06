@@ -20,25 +20,30 @@ namespace WingedKeys
 	{
 		public static void Main(string[] args)
 		{
+			var environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
+
 			var host = CreateHostBuilder(args).Build();
 
-			using (var scope = host.Services.CreateScope())
+			if (environment != Environments.Production)
 			{
-				var services = scope.ServiceProvider;
-				try
+				using (var scope = host.Services.CreateScope())
 				{
-					var persistedGrantDbContext = services.GetRequiredService<PersistedGrantDbContext>();
-					var configurationDbContext = services.GetRequiredService<ConfigurationDbContext>();
-					var wingedKeysContext = services.GetRequiredService<WingedKeysContext>();
-					var userMgr = services.GetRequiredService<UserManager<ApplicationUser>>();
-					var configuration = services.GetRequiredService<IConfiguration>();
-					var config = new Config(configuration);
-					DatabaseInitializer.Initialize(persistedGrantDbContext, configurationDbContext, wingedKeysContext, userMgr, config);
-				}
-				catch (Exception ex)
-				{
-					var logger = services.GetRequiredService<ILogger<Program>>();
-					logger.LogError(ex, "An error occurred while seeding the database.");
+					var services = scope.ServiceProvider;
+					try
+					{
+						var persistedGrantDbContext = services.GetRequiredService<PersistedGrantDbContext>();
+						var configurationDbContext = services.GetRequiredService<ConfigurationDbContext>();
+						var wingedKeysContext = services.GetRequiredService<WingedKeysContext>();
+						var userMgr = services.GetRequiredService<UserManager<ApplicationUser>>();
+						var configuration = services.GetRequiredService<IConfiguration>();
+						var config = new Config(configuration);
+						DatabaseInitializer.Initialize(persistedGrantDbContext, configurationDbContext, wingedKeysContext, userMgr, config);
+					}
+					catch (Exception ex)
+					{
+						var logger = services.GetRequiredService<ILogger<Program>>();
+						logger.LogError(ex, "An error occurred while seeding the database.");
+					}
 				}
 			}
 
@@ -56,8 +61,7 @@ namespace WingedKeys
 					logging.AddDebug();
 
 					var environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
-					var isDevelopment = environment == Microsoft.Extensions.Hosting.Environments.Development;
-					if (!isDevelopment)
+					if (environment != Environments.Development)
 					{
 						logging.AddAWSProvider();
 						logging.AddEventLog();
