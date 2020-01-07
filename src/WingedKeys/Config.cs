@@ -83,7 +83,7 @@ namespace WingedKeys
 
 		public IEnumerable<Client> GetClients()
 		{
-			var accessTokenLifetime = Configuration.GetValue<string>("AccessTokenLifetime");
+			var accessTokenLifetime = Configuration.GetValue<int>("AccessTokenLifetime");
 			var baseUri = Configuration.GetValue<string>("BaseUri");
 			var clientUrisRaw = Configuration.GetValue<string>("ClientUris");
 			var clientUris = clientUrisRaw.Split(",", StringSplitOptions.RemoveEmptyEntries);
@@ -109,7 +109,7 @@ namespace WingedKeys
 					PostLogoutRedirectUris = postLogoutRedirectUris,
 					AllowedCorsOrigins =     allowedCorsOrigins,
 
-					AccessTokenLifetime = Int32.Parse(accessTokenLifetime),
+					AccessTokenLifetime = accessTokenLifetime,
 
 					AllowedScopes =
 					{

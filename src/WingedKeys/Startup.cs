@@ -62,20 +62,29 @@ namespace WingedKeys
 			// MVC
 			services.AddMvc(option => option.EnableEndpointRouting = false);
 
-			 services.AddIdentity<ApplicationUser, IdentityRole>(config =>
-				{
-						config.SignIn.RequireConfirmedEmail = true;
-						config.User.RequireUniqueEmail = true;
-						// Password requirements
-						config.Password.RequireDigit = false;
-						config.Password.RequiredLength = 6;
-						config.Password.RequiredUniqueChars = 1;
-						config.Password.RequireLowercase = false;
-						config.Password.RequireNonAlphanumeric = false;
-						config.Password.RequireUppercase = false;
-				})
-				.AddEntityFrameworkStores<WingedKeysContext>()
-				.AddDefaultTokenProviders();
+			// Password Variables
+			var requireDigit = Configuration.GetValue<bool>("PasswordRequirements:RequireDigit");
+			var requiredLength = Configuration.GetValue<int>("PasswordRequirements:RequiredLength");
+			var requiredUniqueChars = Configuration.GetValue<int>("PasswordRequirements:RequiredUniqueChars");
+			var requireLowercase = Configuration.GetValue<bool>("PasswordRequirements:RequireLowercase");
+			var requireNonAlphanumeric = Configuration.GetValue<bool>("PasswordRequirements:RequireNonAlphanumeric");
+			var requireUppercase = Configuration.GetValue<bool>("PasswordRequirements:RequireUppercase");
+
+			// Identity Server config
+			services.AddIdentity<ApplicationUser, IdentityRole>(config =>
+			{
+					config.SignIn.RequireConfirmedEmail = true;
+					config.User.RequireUniqueEmail = true;
+					// Password requirements
+					config.Password.RequireDigit = requireDigit;
+					config.Password.RequiredLength = requiredLength;
+					config.Password.RequiredUniqueChars = requiredUniqueChars;
+					config.Password.RequireLowercase = requireLowercase;
+					config.Password.RequireNonAlphanumeric = requireNonAlphanumeric;
+					config.Password.RequireUppercase = requireUppercase;
+			})
+			.AddEntityFrameworkStores<WingedKeysContext>()
+			.AddDefaultTokenProviders();
 
 			// Identity Server
 			var identityServerServices = services
