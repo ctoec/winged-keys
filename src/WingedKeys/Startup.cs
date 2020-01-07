@@ -82,15 +82,16 @@ namespace WingedKeys
 				.AddIdentityServer(options =>
 				{
 					var baseUri = Configuration.GetValue<string>("BaseUri");
-					var dockerDns = Configuration.GetValue<string>("DockerDns");
-					if (dockerDns != null)
+					var issuerUri = Configuration.GetValue<string>("IssuerUri");
+					if (issuerUri != "")
 					{
-						options.IssuerUri = dockerDns;
+						options.IssuerUri = issuerUri;
 					}
 					else
 					{
 						options.PublicOrigin = baseUri;
 					}
+
 					if (Environment.IsDevelopment())
 					{
 						IdentityModelEventSource.ShowPII = true;
