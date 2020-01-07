@@ -20,10 +20,10 @@ namespace WingedKeys
 	{
 		public static void Main(string[] args)
 		{
-			var environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
 
 			var host = CreateHostBuilder(args).Build();
 
+			var environment = GetEnvironmentNameFromAppSettings();
 			if (environment != Environments.Production)
 			{
 				using (var scope = host.Services.CreateScope())
@@ -50,8 +50,9 @@ namespace WingedKeys
 			host.Run();
 		}
 
-		public static IHostBuilder CreateHostBuilder(string[] args) =>
-			Host.CreateDefaultBuilder(args)
+		public static IWebHostBuilder CreateHostBuilder(string[] args) {
+			var environment = GetEnvironmentNameFromAppSettings();
+			return WebHost.CreateDefaultBuilder(args)
 				.ConfigureLogging((context, logging) =>
 				{
 					logging.ClearProviders();
@@ -60,17 +61,24 @@ namespace WingedKeys
 					logging.AddConsole();
 					logging.AddDebug();
 
-					var environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
 					if (environment != Environments.Development)
 					{
 						logging.AddAWSProvider();
 						logging.AddEventLog();
 					}
 
-				})
-				.ConfigureWebHostDefaults(webBuilder =>
-				{
-					webBuilder.UseStartup<Startup>();
-				});
+			})
+			.UseEnvironment(environment)
+			.UseStartup<Startup>();
+		}
+
+		private static string GetEnvironmentNameFromAppSettings(string defaultValue = null)
+		{
+			return new ConfigurationBuilder()
+				.SetBasePath(Directory.GetCurrentDirectory())
+				.AddJsonFile("appsettings.json", optional: true)
+				.Build()
+				.GetValue<string>("EnvironmentName", defaultValue ?? "Development");
+		}
 	}
 }
