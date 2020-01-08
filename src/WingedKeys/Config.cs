@@ -24,27 +24,6 @@ namespace WingedKeys
 			Configuration = configuration;
 		}
 
-		public List<TestUser> GetUsers()
-		{
-			return new List<TestUser>
-			{
-				new TestUser
-				{
-					SubjectId = "1",
-					Username = "voldemort",
-					Password = "thechosenone",
-
-					Claims = new []
-					{
-						new Claim("name", "Voldemort"),
-						new Claim("allowed_apps", "hedwig"),
-						new Claim("role", "developer"),
-						new Claim("role", "oec-admin"),
-					}
-				}
-			};
-		}
-
 		public IEnumerable<IdentityResource> GetIdentityResources()
 		{
 			return new List<IdentityResource>
