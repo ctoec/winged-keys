@@ -1,4 +1,13 @@
 FROM mcr.microsoft.com/dotnet/core/sdk:3.0
+
+ARG USERNAME=developer
+ARG USER_UID=1000
+ARG USER_GID=$USER_UID
+
+# Create the user
+RUN groupadd --gid $USER_GID $USERNAME \
+	&& useradd --uid $USER_UID --gid $USER_GID -m $USERNAME
+
 RUN apt-get update \
 	&& apt-get install -y --no-install-recommends unzip \
 	&& curl -sSL https://aka.ms/getvsdbgsh | bash /dev/stdin -v latest -l /vsdbg \
