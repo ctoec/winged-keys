@@ -53,10 +53,12 @@ namespace WingedKeys
 						.AllowAnyOrigin();
 					}
 				);
+				var clientUrisRaw = Configuration.GetValue<string>("ClientUris");
+				var clientUris = clientUrisRaw.Split(",", StringSplitOptions.RemoveEmptyEntries);
 				options.AddPolicy("Production",
 					builder =>
 					{
-						builder.WithOrigins(Configuration.GetValue<string>("ClientUris"));
+						builder.WithOrigins(clientUris);
 					}
 				);
 			});
