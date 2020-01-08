@@ -53,6 +53,12 @@ namespace WingedKeys
 						.AllowAnyOrigin();
 					}
 				);
+				options.AddPolicy("Production",
+					builder =>
+					{
+						builder.WithOrigins(Configuration.GetValue<string>("ClientUris"));
+					}
+				);
 			});
 
 			services.AddDbContext<WingedKeysContext>(options =>
@@ -145,6 +151,10 @@ namespace WingedKeys
 			{
 				app.UseDeveloperExceptionPage();
 				app.UseCors("AllowAll");
+			}
+			else
+			{
+				app.UseCors("Production");
 			}
 
 			app.UseRouting();
