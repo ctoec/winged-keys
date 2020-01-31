@@ -24,11 +24,15 @@ namespace WingedKeys
 			var host = CreateHostBuilder(args).Build();
 
 			var environment = GetEnvironmentNameFromAppSettings();
+
 			if (environment != Environments.Production)
 			{
 				using (var scope = host.Services.CreateScope())
 				{
 					var services = scope.ServiceProvider;
+					var logger = services.GetRequiredService<ILogger<Program>>();
+					logger.LogInformation("Detected environment " + environment);
+
 					try
 					{
 						var persistedGrantDbContext = services.GetRequiredService<PersistedGrantDbContext>();
@@ -41,7 +45,6 @@ namespace WingedKeys
 					}
 					catch (Exception ex)
 					{
-						var logger = services.GetRequiredService<ILogger<Program>>();
 						logger.LogError(ex, "An error occurred while seeding the database.");
 					}
 				}
@@ -63,7 +66,7 @@ namespace WingedKeys
 
 					if (environment != Environments.Development)
 					{
-						logging.AddAWSProvider();
+						logging.AddAWSProvider(context.Configuration.GetAWSLoggingConfigSection());
 						logging.AddEventLog();
 					}
 
