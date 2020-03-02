@@ -1,0 +1,62 @@
+@model NewAccountViewModel
+
+<div>
+  <div class="page-header">
+      <h1>Create new account</h1>
+  </div>
+  @if (Model.Success == true)
+  {
+    <div class="row">
+      <div class="col-sm-6">
+        <strong>Succesfully created new account</strong>
+      </div>
+    </div>
+  }
+  @if (Model.Error != null)
+  {
+    <div class="row">
+      <div class="col-sm-6">
+        <strong>@(Model.Error)</strong>
+      </div>
+    </div>
+  }
+  <div class="row">
+    <div class="col-sm-6">
+      <div class="panel panel-default">
+        <div class="panel-heading">
+            <h3 class="panel-title">New account details</h3>
+        </div>
+        <div class="panel-body">
+          <form asp-route="NewAccount">
+            <fieldset>
+              <div class="form-group">
+                <label asp-for="GivenName">Given name</label>
+                <input class="form-control" placeholder="First name" asp-for="GivenName" autofocus>
+              </div>
+              <div class="form-group">
+                <label asp-for="FamilyName">Family name</label>
+                <input class="form-control" placeholder="Last name" asp-for="FamilyName">
+              </div>
+              <div class="form-group">
+                <label asp-for="Username"></label>
+                <input class="form-control" placeholder="Username" asp-for="Username">
+              </div>
+              <div class="form-group">
+                <label asp-for="Email"></label>
+                <input class="form-control" placeholder="Email" asp-for="Email">
+              </div>
+              <div class="form-group">
+                <label asp-for="Password"></label>
+                <input type="password" class="form-control" placeholder="Password" asp-for="Password" autocomplete="off">
+              </div>
+              <div class="form-group">
+                <button class="btn btn-primary" name="button" value="create">Create</button>
+                <button class="btn btn-default" name="button" value="cancel">Cancel</button>
+              </div>
+            </fieldset>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

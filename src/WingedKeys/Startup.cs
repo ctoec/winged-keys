@@ -144,6 +144,12 @@ namespace WingedKeys
 				}
 
 				services.AddAuthentication();
+
+				services.AddAuthorization(options =>
+				{
+					options.AddPolicy("AdminOnly", policy =>
+						policy.RequireClaim("role", "admin"));
+				});
 		}
 
 		// This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
