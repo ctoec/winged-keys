@@ -1,12 +1,5 @@
 using IdentityModel;
-using IdentityServer4.Events;
-using IdentityServer4.Extensions;
-using IdentityServer4.Models;
-using IdentityServer4.Services;
-using IdentityServer4.Stores;
-using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using System;
@@ -22,14 +15,10 @@ namespace IdentityServer4.Quickstart.UI
 		public class AdminController : Controller
 		{
 				private readonly UserManager<ApplicationUser> _userManager;
-				private readonly SignInManager<ApplicationUser> _signInManager;
 
-				public AdminController(
-						UserManager<ApplicationUser> userManager,
-						SignInManager<ApplicationUser> signInManager)
+				public AdminController(UserManager<ApplicationUser> userManager)
 				{
 						_userManager = userManager;
-						_signInManager = signInManager;
 				}
 
 				/// <summary>
@@ -41,7 +30,7 @@ namespace IdentityServer4.Quickstart.UI
 				)
 				{
 						// build a model so we know what to show on the login page
-						var vm = await BuildNewAccountViewModelAsync();
+						var vm = BuildNewAccountViewModel();
 						vm.Success = success;
 						return View(vm);
 				}
@@ -106,11 +95,9 @@ namespace IdentityServer4.Quickstart.UI
 					{
 						error = "Missing information. All fields are required";
 					}
-					// await _events.RaiseAsync(new UserLoginFailureEvent(model.Username, "invalid credentials", clientId:context?.ClientId));
-					// ModelState.AddModelError(string.Empty, AccountOptions.InvalidCredentialsErrorMessage);
 
 					// something went wrong, show form with error
-					var errorVm = await BuildNewAccountViewModelAsync(model, error);
+					var errorVm = BuildNewAccountViewModel(error);
 					return View(errorVm);
 				}
 
@@ -123,14 +110,14 @@ namespace IdentityServer4.Quickstart.UI
 				/*****************************************/
 				/* helper APIs for the AdminController */
 				/*****************************************/
-				private async Task<NewAccountViewModel> BuildNewAccountViewModelAsync()
+				private NewAccountViewModel BuildNewAccountViewModel()
 				{
 					return new NewAccountViewModel();
 				}
 
-				private async Task<NewAccountViewModel> BuildNewAccountViewModelAsync(NewAccountInputModel model, string error)
+				private NewAccountViewModel BuildNewAccountViewModel(string error)
 				{
-					var vm = await BuildNewAccountViewModelAsync();
+					var vm = BuildNewAccountViewModel();
 					if (error != null) 
 					{
 						vm.Success = false;
