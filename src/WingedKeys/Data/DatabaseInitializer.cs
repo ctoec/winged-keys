@@ -91,7 +91,8 @@ namespace WingedKeys.Data
 				new Claim(JwtClaimTypes.FamilyName, "Riddle"),
 				new Claim(JwtClaimTypes.Email, "voldemort@hogwarts.uk.co"),
 				new Claim(JwtClaimTypes.EmailVerified, "true", ClaimValueTypes.Boolean),
-				new Claim("role", "developer")
+				new Claim("role", "developer"),
+				new Claim("role", "admin"),
 			}).Result;
 
 			if (!result.Succeeded)
