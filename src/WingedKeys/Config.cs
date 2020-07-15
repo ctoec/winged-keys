@@ -56,6 +56,25 @@ namespace WingedKeys
 							UserClaims = new [] { "role", "allowed_apps" }
 						}
 					}
+				},
+				new ApiResource
+				{
+					Name = "data_collection_backend",
+
+					Description = "Data Collection API",
+
+					// include the following using claims in access token (in addition to subject id)
+					UserClaims = { "role" },
+
+					Scopes =
+					{
+						new Scope()
+						{
+							Name = "data_collection_backend",
+							DisplayName = "Full access to Data Collection API",
+							UserClaims = new [] { "role", "allowed_apps" }
+						}
+					}
 				}
 			};
 		}
@@ -95,6 +114,30 @@ namespace WingedKeys
 						IdentityServerConstants.StandardScopes.OpenId,
 						IdentityServerConstants.StandardScopes.Profile,
 						"hedwig_backend"
+					},
+
+					AllowOfflineAccess = true,
+				},
+				// Data Collection Client
+				new Client
+				{
+					ClientId = "data-collection",
+					ClientName = "Data Collection Client",
+					AllowedGrantTypes = GrantTypes.Code,
+					RequireClientSecret = false,
+					RequireConsent = false,
+
+					RedirectUris =           redirectUris,
+					PostLogoutRedirectUris = postLogoutRedirectUris,
+					AllowedCorsOrigins =     allowedCorsOrigins,
+
+					AccessTokenLifetime = Int32.Parse(accessTokenLifetime),
+
+					AllowedScopes =
+					{
+						IdentityServerConstants.StandardScopes.OpenId,
+						IdentityServerConstants.StandardScopes.Profile,
+						"data_collection_backend"
 					},
 
 					AllowOfflineAccess = true,
