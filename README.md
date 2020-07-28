@@ -5,6 +5,13 @@ Winged Keys is our hand-rolled .NET application for authentication and identity 
 ## Development
 
 ### Local
-Local development on OSX right now isn't possible, as one of our dependencies (LocalDB) isn't currently supported on OSX.  For the time being, development within Docker is probably your best bet.
+Local development on OSX right now isn't possible, as one of our dependencies (LocalDB) isn't currently supported on OSX.  For the time being, development from directly within Docker is probably your best bet.
 
 ### Docker
+
+1. Install [Docker](https://docs.docker.com/install/) (and maybe [Docker Compose](https://docs.docker.com/compose/install/), but it comes included with Docker Desktop for Mac).
+
+1. Spin up the application!
+    ```bash
+    docker-compose up
+    ```
