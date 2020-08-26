@@ -11,6 +11,13 @@
      steps:
        - checkout
        - run:
+          name: Install .NET SDK
+          command: |
+            sudo apt-get update;
+            sudo apt-get install -y apt-transport-https
+            sudo apt-get update
+            sudo apt-get install -y dotnet-sdk-3.1
+       - run:
           name: Install Entity Framework
           command: dotnet tool install dotnet-ef --version 3.1.4 --global
        - run:
