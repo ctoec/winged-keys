@@ -38,7 +38,7 @@
             export ConnectionStrings__WingedKeys=xxx && dotnet-ef --verbose migrations script --idempotent --output winged-keys-wingedkeys-db.sql --context WingedKeysContext --project src/WingedKeys
        - run:
           name: "Compile and bundle the application"
-          command: dotnet publish src/WingedKeys/WingedKeys.csproj --output src/WingedKeys/dist --configuration Release
+          command: dotnet publish src/WingedKeys/WingedKeys.csproj --output src/WingedKeys/dist --configuration Release --environment "Devsecure"
        - run:
           name: "Add installation files to bundled distribution"
           command: |
