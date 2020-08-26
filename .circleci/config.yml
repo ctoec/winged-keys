@@ -5,7 +5,8 @@
 
  jobs:
    build:
-     executor: win/default     
+     machine:
+      image: ubuntu-1604:202007-01 
     
      steps:
        - checkout
