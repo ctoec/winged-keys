@@ -13,7 +13,7 @@
        - run:
           name: Manually install the .NET SDK
           command: |
-            sudo apt-get install -y gpg
+            sudo apt-get install -y gpg2
             wget -O - https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor -o microsoft.asc.gpg
             sudo mv microsoft.asc.gpg /etc/apt/trusted.gpg.d/
             wget https://packages.microsoft.com/config/ubuntu/16.04/prod.list
