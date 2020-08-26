@@ -45,3 +45,17 @@
             cp installer/aws-windows-deployment-manifest.json src/WingedKeys/dist
             cp installer/iis/web.config src/WingedKeys/dist
             cp -r installer src/WingedKeys/dist/installer
+
+      # TODO: Separate into it's own job
+       - run:
+          name: 'Setup installer for AWS Beanstalk'
+          command: |
+            cd winged-keys-app/winged-keys-app/site
+            cp -f aws-windows-deployment-manifest.json ..
+            cp -r installer/ebextensions ../.ebextensions
+            cp -f installer/iis/web.config web.config
+       - run:
+          name: 'Setup security directory'
+          command: |
+            cd winged-keys-app/winged-keys-app/site
+            mkdir security

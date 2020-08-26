@@ -80,6 +80,8 @@ namespace WingedKeys
 			return new ConfigurationBuilder()
 				.SetBasePath(Directory.GetCurrentDirectory())
 				.AddJsonFile("appsettings.json", optional: true)
+				.AddJsonFile($"appsettings.{env.EnvironmentName}.json", optional: true)
+        .AddEnvironmentVariables()
 				.Build()
 				.GetValue<string>("EnvironmentName", defaultValue ?? "Development");
 		}
