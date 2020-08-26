@@ -28,7 +28,7 @@
           name: Install Entity Framework
           command: dotnet tool install --global dotnet-ef --version 3.1.4
        - run:
-          command: export ConnectionStrings__WingedKeys=xxx && dotnet ef --verbose migrations script --idempotent --output winged-keys-persisted-db.sql --context PersistedGrantDbContext --project src/WingedKeys
+          command: export ConnectionStrings__WingedKeys=xxx && dotnet-ef --verbose migrations script --idempotent --output winged-keys-persisted-db.sql --context PersistedGrantDbContext --project src/WingedKeys
           name: "Generate Persisted migration script"
        - run:
           command: export ConnectionStrings__WingedKeys=xxx && $(Agent.ToolsDirectory)/dotnet-ef --verbose migrations script --idempotent --output $(Build.ArtifactStagingDirectory)/winged-keys-configuration-db.sql --context ConfigurationDbContext --project src/WingedKeys
