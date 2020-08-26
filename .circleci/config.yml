@@ -25,30 +25,23 @@
               sudo apt-get update && \
               sudo apt-get install -y dotnet-sdk-3.1
        - run:
-          name: Install Entity Framework
+          name: Globally install Entity Framework
           command: dotnet tool install --global dotnet-ef --version 3.1.4
        - run:
-          name: Add Global Dotnet Tools to Path
+          name: Add global Dotnet tools to path
           command: echo 'export PATH="$PATH:$HOME/.dotnet/tools/"' >> $BASH_ENV
        - run:
-          command: export ConnectionStrings__WingedKeys=xxx && dotnet-ef --verbose migrations script --idempotent --output winged-keys-persisted-db.sql --context PersistedGrantDbContext --project src/WingedKeys
-          name: "Generate Persisted migration script"
+          name: Generate migrations
+          command: |
+            export ConnectionStrings__WingedKeys=xxx && dotnet-ef --verbose migrations script --idempotent --output winged-keys-persisted-db.sql --context PersistedGrantDbContext --project src/WingedKeys
+            export ConnectionStrings__WingedKeys=xxx && dotnet-ef --verbose migrations script --idempotent --output winged-keys-configuration-db.sql --context ConfigurationDbContext --project src/WingedKeys
+            export ConnectionStrings__WingedKeys=xxx && dotnet-ef --verbose migrations script --idempotent --output winged-keys-wingedkeys-db.sql --context WingedKeysContext --project src/WingedKeys
        - run:
-          command: export ConnectionStrings__WingedKeys=xxx && dotnet-ef --verbose migrations script --idempotent --output winged-keys-configuration-db.sql --context ConfigurationDbContext --project src/WingedKeys
-          name: "Generate Configuration migration script"
-       - run:
-          command: export ConnectionStrings__WingedKeys=xxx && dotnet-ef --verbose migrations script --idempotent --output winged-keys-wingedkeys-db.sql --context WingedKeysContext --project src/WingedKeys
-          name: "Generate Configuration migration script"
-       - run:
+          name: "Compile and bundle the application"
           command: dotnet publish src/WingedKeys/WingedKeys.csproj" --output src/WingedKeys/dist" --configuration Release
-          name: "Script: dotnet publish"
        - run:
-          command: cp installer/aws-windows-deployment-manifest.json $(Build.SourcesDirectory)/src/WingedKeys/dist
-          name: "Script: add installer manifest to distribution"
-       - run: 
-          command: cp installer/iis/web.config $(Build.SourcesDirectory)/src/WingedKeys/dist
-          name: "Script: add installer web.config to distribution"
-       - run:
-          command: cp -r installer $(Build.SourcesDirectory)/src/WingedKeys/dist/installer
-          name: "Script: add installer files to distribution"
-
+          name: "Add installation files to bundled distribution"
+          command: |
+            cp installer/aws-windows-deployment-manifest.json src/WingedKeys/dist
+            cp installer/iis/web.config src/WingedKeys/dist
+            cp -r installer src/WingedKeys/dist/installer
