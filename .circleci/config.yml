@@ -29,18 +29,18 @@
           command: dotnet tool install --global dotnet-ef --version 3.1.4
        - run:
           name: Add Global Dotnet Tools to Path
-          command: echo 'export PATH="$PATH:$HOME/.dotnet/tools/" >> $BASH_ENV
+          command: echo 'export PATH="$PATH:$HOME/.dotnet/tools/"' >> $BASH_ENV
        - run:
           command: export ConnectionStrings__WingedKeys=xxx && dotnet-ef --verbose migrations script --idempotent --output winged-keys-persisted-db.sql --context PersistedGrantDbContext --project src/WingedKeys
           name: "Generate Persisted migration script"
        - run:
-          command: export ConnectionStrings__WingedKeys=xxx && $(Agent.ToolsDirectory)/dotnet-ef --verbose migrations script --idempotent --output $(Build.ArtifactStagingDirectory)/winged-keys-configuration-db.sql --context ConfigurationDbContext --project src/WingedKeys
+          command: export ConnectionStrings__WingedKeys=xxx && dotnet-ef --verbose migrations script --idempotent --output winged-keys-configuration-db.sql --context ConfigurationDbContext --project src/WingedKeys
           name: "Generate Configuration migration script"
        - run:
-          command: export ConnectionStrings__WingedKeys=xxx && $(Agent.ToolsDirectory)/dotnet-ef --verbose migrations script --idempotent --output $(Build.ArtifactStagingDirectory)/winged-keys-wingedkeys-db.sql --context WingedKeysContext --project src/WingedKeys
+          command: export ConnectionStrings__WingedKeys=xxx && dotnet-ef --verbose migrations script --idempotent --output winged-keys-wingedkeys-db.sql --context WingedKeysContext --project src/WingedKeys
           name: "Generate Configuration migration script"
        - run:
-          command: dotnet publish "$(Build.SourcesDirectory)/src/WingedKeys/WingedKeys.csproj" --output "$(Build.SourcesDirectory)/src/WingedKeys/dist" --configuration Release
+          command: dotnet publish src/WingedKeys/WingedKeys.csproj" --output src/WingedKeys/dist" --configuration Release
           name: "Script: dotnet publish"
        - run:
           command: cp installer/aws-windows-deployment-manifest.json $(Build.SourcesDirectory)/src/WingedKeys/dist
