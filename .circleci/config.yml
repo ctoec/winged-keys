@@ -11,10 +11,9 @@
      steps:
        - checkout
        - run:
-          name: Install .NET SDK
+          name: Install the .NET SDK
           command: |
-            sudo apt-get update;
-            sudo apt-get install -y apt-transport-https
+            sudo dpkg --purge packages-microsoft-prod && sudo dpkg -i packages-microsoft-prod.deb
             sudo apt-get update
             sudo apt-get install -y dotnet-sdk-3.1
        - run:
