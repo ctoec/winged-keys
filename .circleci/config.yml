@@ -26,7 +26,7 @@
               sudo apt-get install -y dotnet-sdk-3.1
        - run:
           name: Install Entity Framework
-          command: dotnet tool install dotnet-ef --version 3.1.4 --global
+          command: dotnet tool install --global dotnet-ef --version 3.1.4
        - run:
           command: export ConnectionStrings__WingedKeys=xxx && dotnet-ef --verbose migrations script --idempotent --output winged-keys-persisted-db.sql --context PersistedGrantDbContext --project src/WingedKeys
           name: "Generate Persisted migration script"
