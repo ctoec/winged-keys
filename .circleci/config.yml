@@ -11,11 +11,19 @@
      steps:
        - checkout
        - run:
-          name: Install the .NET SDK
+          name: Manually install the .NET SDK
           command: |
-            sudo dpkg --purge packages-microsoft-prod && sudo dpkg -i packages-microsoft-prod.deb
-            sudo apt-get update
-            sudo apt-get install -y dotnet-sdk-3.1
+            sudo apt-get install -y gpg
+            wget -O - https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor -o microsoft.asc.gpg
+            sudo mv microsoft.asc.gpg /etc/apt/trusted.gpg.d/
+            wget https://packages.microsoft.com/config/ubuntu/16.04/prod.list
+            sudo mv prod.list /etc/apt/sources.list.d/microsoft-prod.list
+            sudo chown root:root /etc/apt/trusted.gpg.d/microsoft.asc.gpg
+            sudo chown root:root /etc/apt/sources.list.d/microsoft-prod.list
+            sudo apt-get update; \
+              sudo apt-get install -y apt-transport-https && \
+              sudo apt-get update && \
+              sudo apt-get install -y dotnet-sdk-3.1
        - run:
           name: Install Entity Framework
           command: dotnet tool install dotnet-ef --version 3.1.4 --global
