@@ -2,6 +2,7 @@
 
  orbs:
   win: circleci/windows@2.2.0
+  aws-s3: circleci/aws-s3@1.0.16
 
  jobs:
    build:
@@ -50,12 +51,16 @@
        - run:
           name: 'Setup installer for AWS Beanstalk'
           command: |
-            cd winged-keys-app/winged-keys-app/site
+            cd winged-keys-app/winged-keys-app
             cp -f aws-windows-deployment-manifest.json ..
             cp -r installer/ebextensions ../.ebextensions
             cp -f installer/iis/web.config web.config
        - run:
           name: 'Setup security directory'
           command: |
-            cd winged-keys-app/winged-keys-app/site
+            cd winged-keys-app/winged-keys-app
             mkdir security
+       - aws-s3/copy:
+          # TODO: Customize by env
+          from: 's3://ece-reporter-staging-store/secrets/wingedkeys/staging-wingedkeys.pfx'
+          to: winged-keys-app/winged-keys-app/security/
