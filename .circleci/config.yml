@@ -101,7 +101,7 @@
           name: Initialize Elastic Beanstalk
           command: |
             cd src/WingedKeys/
-            eb init ece-wingedkeys-<< parameters.env >>-app --region us-east-2 --platform iis-8
+            eb init ece-wingedkeys-<< parameters.env >>-app --region us-east-2 --platform iis-10.0
        - run:
           name: Deploy to Elastic Beanstalk environment
           command: |
