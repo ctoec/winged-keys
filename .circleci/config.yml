@@ -92,6 +92,10 @@
             mv src/WingedKeys/dist src/WingedKeys/site
             cd src/WingedKeys/
             zip -r site.zip site
+            mkdir winged-keys-app
+            mv site.zip winged-keys-app/site.zip
+            mv aws-windows-deployment-manifest.json winged-keys-app/aws-windows-deployment-manifest.json
+            zip -r winged-keys-app.zip winged-keys-app
        - run:
           name: Clean up remainder of deploy directory
           command: |
@@ -102,6 +106,7 @@
           command: |
             cd src/WingedKeys/
             eb init ece-wingedkeys-<< parameters.env >>-app --region us-east-2 --platform iis-10.0
+            cat .ebextensions/config.yml
        - run:
           name: Deploy to Elastic Beanstalk environment
           command: |
