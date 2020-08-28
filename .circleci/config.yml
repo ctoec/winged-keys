@@ -83,23 +83,20 @@
             sudo apt-get install python3-pip python3-dev build-essential
             sudo pip3 install awsebcli
        - run:
-          name: Prep deploy directory
+          name: Prep deploy bundle for Elastic Beanstalk
           command: |
-            mkdir deploy
-            zip -r site.zip src/WingedKeys/dist
-            cp -f aws-windows-deployment-manifest.json deploy
-            cp -r installer/ebextensions deploy/.ebextensions
-            cp -f site.zip deploy
-            cd deploy && ls
+            cd src/WingedKeys/
+            zip -r site.zip dist
+            rm -rf dist
        - run:
           name: Initialize Elastic Beanstalk
           command: |
-            cd deploy
+            cd src/WingedKeys/
             eb init ece-wingedkeys-<< parameters.env >>-app --region us-east-2 --platform iis-8
        - run:
           name: Deploy to Elastic Beanstalk environment
           command: |
-            cd deploy
+            cd src/WingedKeys/
             eb deploy ece-wingedkeys-<< parameters.env >>-env
 
  workflows:
