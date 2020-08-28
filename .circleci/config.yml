@@ -8,6 +8,10 @@
    build:
      machine:
       image: ubuntu-1604:202007-01 
+     parameters:
+      env:
+        description: "The environment to deploy Winged Keys to (qa, devsecure, staging)"
+        type: string
     
      steps:
        - checkout
@@ -80,7 +84,13 @@
             sudo pip3 install awsebcli
        - run:
           name: Initialize Elastic Beanstalk
-          command: eb init ece-wingedkeys-devsecure-app --region us-east-2 --platform iis-8
+          command: eb init ece-wingedkeys-<< parameters.env >>-app --region us-east-2 --platform iis-8
        - run:
           name: Deploy to Elastic Beanstalk environment
-          command: eb deploy ece-wingedkeys-devsecure-env
+          command: eb deploy ece-wingedkeys-<< parameters.env >>-env
+
+  workflows:
+    deploy-to-devsecure:
+      jobs:
+        - build:
+            env: devsecure
