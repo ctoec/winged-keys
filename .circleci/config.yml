@@ -79,6 +79,7 @@ jobs:
       - run:
           name: 'Update Appsettings with environment specific variables'
           command: |
+            sudo apt-get install moreutils
             cd src/WingedKeys
             jq '.AccessTokenLifetime="1800"' appsettings.json | sponge appsettings.json
             jq '.BaseUri="https://<< parameters.env >>.ece-wingedkeys.ctoecskylight.com"' appsettings.json | sponge appsettings.json
