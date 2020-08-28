@@ -65,11 +65,16 @@
           # TODO: Customize by env
           from: 's3://ece-reporter-staging-store/secrets/wingedkeys/staging-wingedkeys.pfx'
           to: src/WingedKeys/dist/security/
-       - aws-cli/setup
+      #  - run:
+      #     name: 'Apply SQL Migrations'
+      #     command: |
+      #       cd src/WingedKeys/dist/ && ls
+      #       /home/ubuntu/scripts/db-migrate-wingedkeys.sh winged-keys-configuration-db.sql
+      #       /home/ubuntu/scripts/db-migrate-wingedkeys.sh winged-keys-persisted-db.sql
+      #       /home/ubuntu/scripts/db-migrate-wingedkeys.sh winged-keys-wingedkeys-db.sql
        - run:
-          name: 'Apply SQL Migrations'
-          command: |
-            cd src/WingedKeys/dist/ && ls
-            /home/ubuntu/scripts/db-migrate-wingedkeys.sh winged-keys-configuration-db.sql
-            /home/ubuntu/scripts/db-migrate-wingedkeys.sh winged-keys-persisted-db.sql
-            /home/ubuntu/scripts/db-migrate-wingedkeys.sh winged-keys-wingedkeys-db.sql
+          name: Initialize Elastic Beanstalk
+          command: eb init ece-wingedkeys-devsecure-app --region us-east-2 --platform iis-8
+       - run:
+          name: Deploy to Elastic Beanstalk environment
+          command: aws eb deploy ece-wingedkeys-devsecure-env
