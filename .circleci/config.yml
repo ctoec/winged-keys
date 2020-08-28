@@ -67,7 +67,7 @@
        - run:
           name: 'Apply SQL Migrations'
           command: |
-            cd src/ && ls
+            cd src/WingedKeys/ && ls
             /home/ubuntu/scripts/db-migrate-wingedkeys.sh winged-keys-configuration-db.sql
             /home/ubuntu/scripts/db-migrate-wingedkeys.sh winged-keys-persisted-db.sql
             /home/ubuntu/scripts/db-migrate-wingedkeys.sh winged-keys-wingedkeys-db.sql
