@@ -89,13 +89,14 @@
        - run:
           name: Create deploy bundle for Elastic Beanstalk
           command: |
+            mv src/WingedKeys/dist src/WingedKeys/site
             cd src/WingedKeys/
-            zip -r site.zip dist
+            zip -r site.zip site
        - run:
           name: Clean up remainder of deploy directory
           command: |
             cd src/WingedKeys/
-            rm -rf dist
+            rm -rf site
        - run:
           name: Initialize Elastic Beanstalk
           command: |
