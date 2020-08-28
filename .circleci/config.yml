@@ -59,11 +59,15 @@
             cp -f aws-windows-deployment-manifest.json ..
             cp -r installer/ebextensions ../.ebextensions
             cp -f installer/iis/web.config web.config
+            cp -f installer/iis/web.config ../web.config
        - run:
           name: 'Create security directory'
           command: |
             cd src/WingedKeys/dist
             mkdir security
+      #  - run:
+      #     name: 'Token replace with environment variables'
+      #     command: |
        - aws-s3/copy:
           # TODO: Customize by env
           from: 's3://ece-reporter-staging-store/secrets/wingedkeys/staging-wingedkeys.pfx'
@@ -83,10 +87,15 @@
             sudo apt-get install python3-pip python3-dev build-essential
             sudo pip3 install awsebcli
        - run:
-          name: Prep deploy bundle for Elastic Beanstalk
+          name: Create deploy bundle for Elastic Beanstalk
           command: |
             cd src/WingedKeys/
             zip -r site.zip dist
+            rm -rf dist
+       - run:
+          name: Clean up remainder of deploy directory
+          command: |
+            cd src/WingedKeys/
             rm -rf dist
        - run:
           name: Initialize Elastic Beanstalk
