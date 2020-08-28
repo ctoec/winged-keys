@@ -106,12 +106,11 @@
           command: |
             cd src/WingedKeys/
             eb init ece-wingedkeys-<< parameters.env >>-app --region us-east-2 --platform iis-10.0
-            cat .ebextensions/config.yml
        - run:
           name: Deploy to Elastic Beanstalk environment
           command: |
             cd src/WingedKeys/
-            eb deploy ece-wingedkeys-<< parameters.env >>-env
+            eb deploy ece-wingedkeys-<< parameters.env >>-env --staged
 
  workflows:
     deploy-to-devsecure:
