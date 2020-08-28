@@ -80,11 +80,13 @@ jobs:
           name: 'Update Appsettings with environment specific variables'
           command: |
             cd src/WingedKeys
-            jq '.AccessTokenLifetime="1800"' > temp.json && mv temp.json appsettings.json && rm temp.json
-            jq '.BaseUri="https://<< parameters.env >>.ece-wingedkeys.ctoecskylight.com"' > temp.json && mv temp.json appsettings.json && rm temp.json
-            jq '.CertificateFileName="security/<< parameters.env >>-wingedkeys.pfx"' > temp.json && mv temp.json appsettings.json && rm temp.json
-            jq '.ClientUris="https://<< parameters.env >>.ece-hedwig.ctoecskylight.com,https://localhost:5001,https://<< parameters.env >>.ece-fawkes.ctoecskylight.com"' > temp.json && mv temp.json appsettings.json && rm temp.json
-            jq '.EnvironmentName="<< parameters.env >>"' > temp.json && mv temp.json appsettings.json && rm temp.json
+            jq '.AccessTokenLifetime="1800"' > temp.json && mv temp.json appsettings.json
+            jq '.BaseUri="https://<< parameters.env >>.ece-wingedkeys.ctoecskylight.com"' > temp.json && mv temp.json appsettings.json
+            jq '.CertificateFileName="security/<< parameters.env >>-wingedkeys.pfx"' > temp.json && mv temp.json appsettings.json
+            jq '.ClientUris="https://<< parameters.env >>.ece-hedwig.ctoecskylight.com,https://localhost:5001,https://<< parameters.env >>.ece-fawkes.ctoecskylight.com"' > temp.json && mv temp.json appsettings.json
+            jq '.EnvironmentName="<< parameters.env >>"' > temp.json && mv temp.json appsettings.json
+            jq '.ConnectionStrings.WINGEDKEYS="Server=<< parameters.env >>.ece-db.ctoecskylight.com;Database=wingedkeys;User Id=admin;"'
+            cat appsettings.json
       - aws-s3/copy:
           # TODO: Customize by env
           from: 's3://ece-reporter-staging-store/secrets/wingedkeys/staging-wingedkeys.pfx'
