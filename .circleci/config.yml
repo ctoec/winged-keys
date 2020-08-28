@@ -78,13 +78,15 @@ jobs:
           command: sudo apt-get install jq
       - run:
           name: 'Update Appsettings with environment specific variables'
+          # TODO: REMOVE PASSWORDS FROM THIS
           command: |
             cd src/WingedKeys
             jq '.AccessTokenLifetime="1800"' appsettings.json > temp.json && mv temp.json appsettings.json
             jq '.BaseUri="https://<< parameters.env >>.ece-wingedkeys.ctoecskylight.com"' appsettings.json > temp.json && mv temp.json appsettings.json
             jq '.CertificateFileName="security/<< parameters.env >>-wingedkeys.pfx"' appsettings.json > temp.json && mv temp.json appsettings.json
+            jq '.CertificatePassword="f7u7vC3vxEY9bKBWoMSBMI5trFD1Ffo3kQ=="' appsettings.json > temp.json && mv temp.json appsettings.json
             jq '.ClientUris="https://<< parameters.env >>.ece-hedwig.ctoecskylight.com,https://localhost:5001,https://<< parameters.env >>.ece-fawkes.ctoecskylight.com"' appsettings.json > temp.json && mv temp.json appsettings.json
-            jq '.ConnectionStrings.WINGEDKEYS="Server=<< parameters.env >>.ece-db.ctoecskylight.com;Database=wingedkeys;User Id=admin;"' appsettings.json > temp.json && mv temp.json appsettings.json
+            jq '.ConnectionStrings.WINGEDKEYS="Server=<< parameters.env >>.ece-db.ctoecskylight.com;Database=wingedkeys;User Id=admin;Password=Z6EUX_123GwEq_HMVZN_;"' appsettings.json > temp.json && mv temp.json appsettings.json
             jq '.EnvironmentName="<< parameters.env >>"' appsettings.json > temp.json && mv temp.json appsettings.json
             jq '.Logging.LogGroup="/aws/elasticbeanstalk/ece-wingedkeys-<< parameters.env >>-env/app-log"' appsettings.json > temp.json && mv temp.json appsettings.json
             jq '.Logging.LogLevel.Default="Information"' appsettings.json > temp.json && mv temp.json appsettings.json
