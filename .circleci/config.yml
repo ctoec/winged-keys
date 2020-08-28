@@ -78,9 +78,18 @@ jobs:
           command: |
             cd src/WingedKeys/dist
             mkdir security
-    #  - run:
-    #     name: 'Token replace with environment variables'
-    #     command: |
+      - run:
+          name: Install JQ 
+          command: sudo apt-get install jq
+      - run:
+          name: 'Update Appsettings with environment specific variables'
+          command: |
+            cd src/WingedKeys
+            jq '.AccessTokenLifetime="1800"'
+            jq '.BaseUri="https://<< parameters.env >>.ece-wingedkeys.ctoecskylight.com"'
+            jq '.CertificateFileName="security/<< parameters.env >>-wingedkeys.pfx"'
+            jq '.ClientUris="https://<< parameters.env >>.ece-hedwig.ctoecskylight.com,https://localhost:5001,https://<< parameters.env >>.ece-fawkes.ctoecskylight.com"'
+            jq '.EnvironmentName="<< parameters.env >>"'
       - aws-s3/copy:
           # TODO: Customize by env
           from: 's3://ece-reporter-staging-store/secrets/wingedkeys/staging-wingedkeys.pfx'
