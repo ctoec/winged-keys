@@ -8,11 +8,6 @@ jobs:
   build:
     machine:
       image: ubuntu-1604:202007-01 
-    parameters:
-      env:
-        description: "The environment to deploy Winged Keys to (qa, devsecure, staging)"
-        type: string
-  
     steps:
       - checkout
       - run:
@@ -36,7 +31,7 @@ jobs:
           name: Add global Dotnet tools to path
           command: echo 'export PATH="$PATH:$HOME/.dotnet/tools/"' >> $BASH_ENV
       - run:
-          name: Generate migrations
+          name: Generate Migrations
           command: |
             export ConnectionStrings__WingedKeys=xxx && dotnet-ef --verbose migrations script --idempotent --output winged-keys-persisted-db.sql --context PersistedGrantDbContext --project src/WingedKeys
             export ConnectionStrings__WingedKeys=xxx && dotnet-ef --verbose migrations script --idempotent --output winged-keys-configuration-db.sql --context ConfigurationDbContext --project src/WingedKeys
@@ -146,8 +141,7 @@ jobs:
 workflows:
   build-and-test:
     jobs:
-      - build:
-          env: staging
+      - build
       - deploy:
           env: staging
           requires:
@@ -157,8 +151,7 @@ workflows:
               only: master
   deploy-to-devsecure:
     jobs:
-      - build:
-          env: devsecure
+      - build
       - deploy:
           env: devsecure
           requires:
@@ -167,10 +160,7 @@ workflows:
     jobs:
       - hold:
           type: approval
-      - build:
-          env: qa
-          requires:
-            - install
+      - build
       - deploy:
           env: qa
           requires:
