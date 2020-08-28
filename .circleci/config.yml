@@ -50,8 +50,21 @@
             cp installer/aws-windows-deployment-manifest.json src/WingedKeys/dist
             cp installer/iis/web.config src/WingedKeys/dist
             cp -r installer src/WingedKeys/dist/installer
+       - persist_to_workspace:
+          root: .
+          paths:
+            - .
 
-      # TODO: Separate into it's own job
+   deploy:
+     machine:
+      image: ubuntu-1604:202007-01 
+     parameters:
+      env:
+        description: "The environment to deploy Winged Keys to (qa, devsecure, staging)"
+        type: string
+     steps:
+       - attach_workspace:
+          at: .
        - run:
           name: 'Setup installer for AWS Beanstalk'
           command: |
@@ -132,3 +145,7 @@
       jobs:
         - build:
             env: devsecure
+        - deploy:
+            env: devsecure
+            requires:
+              - build
