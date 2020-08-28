@@ -91,6 +91,7 @@ jobs:
             jq '.Logging.LogLevel.System="Warning"' appsettings.json
             jq '.Logging.Region="us-east-2"' appsettings.json
             cat appsettings.json
+            mv appsettings.json dist/appsettings.json
       - aws-s3/copy:
           # TODO: Customize by env
           from: 's3://ece-reporter-staging-store/secrets/wingedkeys/staging-wingedkeys.pfx'
