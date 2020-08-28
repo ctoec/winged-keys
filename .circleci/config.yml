@@ -9,9 +9,9 @@ jobs:
     machine:
       image: ubuntu-1604:202007-01 
     parameters:
-    env:
-      description: "The environment to deploy Winged Keys to (qa, devsecure, staging)"
-      type: string
+      env:
+        description: "The environment to deploy Winged Keys to (qa, devsecure, staging)"
+        type: string
   
     steps:
       - checkout
@@ -59,9 +59,9 @@ jobs:
     machine:
       image: ubuntu-1604:202007-01 
     parameters:
-    env:
-      description: "The environment to deploy Winged Keys to (qa, devsecure, staging)"
-      type: string
+      env:
+        description: "The environment to deploy Winged Keys to (qa, devsecure, staging)"
+        type: string
     steps:
       - attach_workspace:
           at: .
