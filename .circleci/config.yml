@@ -80,11 +80,11 @@ jobs:
           name: 'Update Appsettings with environment specific variables'
           command: |
             cd src/WingedKeys
-            jq '.AccessTokenLifetime="1800"'
-            jq '.BaseUri="https://<< parameters.env >>.ece-wingedkeys.ctoecskylight.com"'
-            jq '.CertificateFileName="security/<< parameters.env >>-wingedkeys.pfx"'
-            jq '.ClientUris="https://<< parameters.env >>.ece-hedwig.ctoecskylight.com,https://localhost:5001,https://<< parameters.env >>.ece-fawkes.ctoecskylight.com"'
-            jq '.EnvironmentName="<< parameters.env >>"'
+            jq '.AccessTokenLifetime="1800"' appsettings.json | sponge appsettings.json
+            jq '.BaseUri="https://<< parameters.env >>.ece-wingedkeys.ctoecskylight.com"' appsettings.json | sponge appsettings.json
+            jq '.CertificateFileName="security/<< parameters.env >>-wingedkeys.pfx"' appsettings.json | sponge appsettings.json
+            jq '.ClientUris="https://<< parameters.env >>.ece-hedwig.ctoecskylight.com,https://localhost:5001,https://<< parameters.env >>.ece-fawkes.ctoecskylight.com"' appsettings.json | sponge appsettings.json
+            jq '.EnvironmentName="<< parameters.env >>"' appsettings.json | sponge appsettings.json
       - aws-s3/copy:
           # TODO: Customize by env
           from: 's3://ece-reporter-staging-store/secrets/wingedkeys/staging-wingedkeys.pfx'
