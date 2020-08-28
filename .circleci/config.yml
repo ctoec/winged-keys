@@ -86,10 +86,10 @@ jobs:
             jq '.ClientUris="https://<< parameters.env >>.ece-hedwig.ctoecskylight.com,https://localhost:5001,https://<< parameters.env >>.ece-fawkes.ctoecskylight.com"' appsettings.json > temp.json && mv temp.json appsettings.json
             jq '.EnvironmentName="<< parameters.env >>"' appsettings.json > temp.json && mv temp.json appsettings.json
             jq '.Logging.LogGroup="/aws/elasticbeanstalk/ece-wingedkeys-<< parameters.env >>-env/app-log"' appsettings.json > temp.json && mv temp.json appsettings.json
-            jq '.Logging.LogLevel.Default="Information"' appsettings.json
-            jq '.Logging.LogLevel.Microsoft="Warning"' appsettings.json
-            jq '.Logging.LogLevel.System="Warning"' appsettings.json
-            jq '.Logging.Region="us-east-2"' appsettings.json
+            jq '.Logging.LogLevel.Default="Information"' appsettings.json > temp.json && mv temp.json appsettings.json
+            jq '.Logging.LogLevel.Microsoft="Warning"' appsettings.json > temp.json && mv temp.json appsettings.json
+            jq '.Logging.LogLevel.System="Warning"' appsettings.json > temp.json && mv temp.json appsettings.json
+            jq '.Logging.Region="us-east-2"' appsettings.json > temp.json && mv temp.json appsettings.json
             cat appsettings.json
             mv appsettings.json dist/appsettings.json
       - aws-s3/copy:
