@@ -90,7 +90,7 @@
           name: Create deploy bundle for Elastic Beanstalk
           command: |
             cd src/WingedKeys/
-            zip -r site.zip dist/
+            zip -r site.zip dist
        - run:
           name: Clean up remainder of deploy directory
           command: |
@@ -100,7 +100,6 @@
           name: Initialize Elastic Beanstalk
           command: |
             cd src/WingedKeys/
-            ls
             eb init ece-wingedkeys-<< parameters.env >>-app --region us-east-2 --platform iis-8
        - run:
           name: Deploy to Elastic Beanstalk environment
