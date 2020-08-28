@@ -64,3 +64,10 @@
           # TODO: Customize by env
           from: 's3://ece-reporter-staging-store/secrets/wingedkeys/staging-wingedkeys.pfx'
           to: src/WingedKeys/dist/security/
+       - run:
+          name: 'Apply SQL Scripts'
+          command: |
+            ls
+            /home/ubuntu/scripts/db-migrate-wingedkeys.sh /home/ubuntu/stage/wingedkeys/$(BUILD.BUILDNUMBER)/winged-keys-configuration-db.sql >> /tmp/installer-db-migrate-winged-keys-configuration-db.log 2>&1
+            /home/ubuntu/scripts/db-migrate-wingedkeys.sh /home/ubuntu/stage/wingedkeys/$(BUILD.BUILDNUMBER)/winged-keys-persisted-db.sql >> /tmp/installer-db-migrate-winged-keys-persisted-db.log 2>&1
+            /home/ubuntu/scripts/db-migrate-wingedkeys.sh /home/ubuntu/stage/wingedkeys/$(BUILD.BUILDNUMBER)/winged-keys-wingedkeys-db.sql >> /tmp/installer-db-migrate-winged-keys-wingedkeys-db.log 2>&1
