@@ -82,12 +82,20 @@
             sudo apt-get -y -qq update
             sudo apt-get install python3-pip python3-dev build-essential
             sudo pip3 install awsebcli
+      #  - run:
+      #     name: Prep deploy directory
+      #     command: |
+      #       cd src/WingedKeys
        - run:
           name: Initialize Elastic Beanstalk
-          command: cd src/WingedKeys/dist && eb init ece-wingedkeys-<< parameters.env >>-app --region us-east-2 --platform iis-8
+          command: |
+            cd src/WingedKeys/dist/
+            eb init ece-wingedkeys-<< parameters.env >>-app --region us-east-2 --platform iis-8
        - run:
           name: Deploy to Elastic Beanstalk environment
-          command: cd src/WingedKeys/dist eb deploy ece-wingedkeys-<< parameters.env >>-env
+          command: |
+            cd src/WingedKeys/dist/
+            eb deploy ece-wingedkeys-<< parameters.env >>-env
 
  workflows:
     deploy-to-devsecure:
