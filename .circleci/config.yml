@@ -90,8 +90,7 @@
           name: Create deploy bundle for Elastic Beanstalk
           command: |
             cd src/WingedKeys/
-            cd dist && ls
-            zip -r site.zip dist
+            zip -r site.zip dist/
        - run:
           name: Clean up remainder of deploy directory
           command: |
