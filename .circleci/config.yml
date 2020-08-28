@@ -72,13 +72,21 @@
           # TODO: Customize by env
           from: 's3://ece-reporter-staging-store/secrets/wingedkeys/staging-wingedkeys.pfx'
           to: src/WingedKeys/dist/security/
-      #  - run:
-      #     name: 'Apply SQL Migrations'
-      #     command: |
-      #       cd src/WingedKeys/dist/ && ls
-      #       /home/ubuntu/scripts/db-migrate-wingedkeys.sh winged-keys-configuration-db.sql
-      #       /home/ubuntu/scripts/db-migrate-wingedkeys.sh winged-keys-persisted-db.sql
-      #       /home/ubuntu/scripts/db-migrate-wingedkeys.sh winged-keys-wingedkeys-db.sql
+       - run:
+          name: 'Put SQL Migrations on Jump Server'
+          command: |
+            ssh ubuntu@<< parameters.env >>.ece-jumpserver.ctoecskylight.com
+            scp winged-keys-configuration-db.sql ubuntu@<< parameters.env >>.ece-jumpserver.ctoecskylight.com:/home/ubuntu/stage/wingedkeys/
+            winged-keys-persisted-db.sql ubuntu@<< parameters.env >>.ece-jumpserver.ctoecskylight.com:/home/ubuntu/stage/wingedkeys/
+            winged-keys-wingedkeys-db.sql ubuntu@<< parameters.env >>.ece-jumpserver.ctoecskylight.com:/home/ubuntu/stage/wingedkeys/
+       - run:
+          name: 'Run SQL Migrations'
+          command: |
+            ssh ubuntu@<< parameters.env >>.ece-jumpserver.ctoecskylight.com
+            cd stage/wingedkeys/
+            /home/ubuntu/scripts/db-migrate-wingedkeys.sh winged-keys-configuration-db.sql
+            /home/ubuntu/scripts/db-migrate-wingedkeys.sh winged-keys-persisted-db.sql
+            /home/ubuntu/scripts/db-migrate-wingedkeys.sh winged-keys-wingedkeys-db.sql
        - run:
           name: Install Elastic Beanstalk CLI
           working_directory: /
