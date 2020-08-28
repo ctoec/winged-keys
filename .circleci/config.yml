@@ -89,7 +89,7 @@
           name: Deploy to Elastic Beanstalk environment
           command: cd src/WingedKeys/dist eb deploy ece-wingedkeys-<< parameters.env >>-env
 
-  workflows:
+ workflows:
     deploy-to-devsecure:
       jobs:
         - build:
