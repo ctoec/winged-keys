@@ -56,7 +56,7 @@
             cp -r installer/ebextensions ../.ebextensions
             cp -f installer/iis/web.config web.config
        - run:
-          name: 'Setup security directory'
+          name: 'Create security directory'
           command: |
             cd src/WingedKeys/dist
             mkdir security
@@ -65,9 +65,9 @@
           from: 's3://ece-reporter-staging-store/secrets/wingedkeys/staging-wingedkeys.pfx'
           to: src/WingedKeys/dist/security/
        - run:
-          name: 'Apply SQL Scripts'
+          name: 'Apply SQL Migrations'
           command: |
-            ls
-            /home/ubuntu/scripts/db-migrate-wingedkeys.sh /home/ubuntu/stage/wingedkeys/$(BUILD.BUILDNUMBER)/winged-keys-configuration-db.sql >> /tmp/installer-db-migrate-winged-keys-configuration-db.log 2>&1
-            /home/ubuntu/scripts/db-migrate-wingedkeys.sh /home/ubuntu/stage/wingedkeys/$(BUILD.BUILDNUMBER)/winged-keys-persisted-db.sql >> /tmp/installer-db-migrate-winged-keys-persisted-db.log 2>&1
-            /home/ubuntu/scripts/db-migrate-wingedkeys.sh /home/ubuntu/stage/wingedkeys/$(BUILD.BUILDNUMBER)/winged-keys-wingedkeys-db.sql >> /tmp/installer-db-migrate-winged-keys-wingedkeys-db.log 2>&1
+            cd src/ && ls
+            /home/ubuntu/scripts/db-migrate-wingedkeys.sh winged-keys-configuration-db.sql
+            /home/ubuntu/scripts/db-migrate-wingedkeys.sh winged-keys-persisted-db.sql
+            /home/ubuntu/scripts/db-migrate-wingedkeys.sh winged-keys-wingedkeys-db.sql
