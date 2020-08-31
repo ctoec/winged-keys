@@ -70,6 +70,9 @@ jobs:
             cp -r installer/ebextensions ../.ebextensions
             cp -f installer/iis/web.config web.config
             cp -f installer/iis/web.config ../web.config
+            cp WingedKeys.runtimeconfig.json winged-keys-app.runtimeconfig.json
+            cp WingedKeys.runtimeconfig.json ece-wingedkeys-<< parameters.env >>-app.runtimeconfig.json
+            cp WingedKeys.runtimeconfig.json ece-wingedkeys-<< parameters.env >>-env.runtimeconfig.json
       - run:
           name: 'Create security directory'
           command: |
