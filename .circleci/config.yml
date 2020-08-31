@@ -127,6 +127,7 @@ jobs:
             cd src/WingedKeys/
             zip -r site.zip site
             zip winged-keys-app.zip site.zip aws-windows-deployment-manifest.json
+            ls
       - run:
           name: Clean up remainder of deploy directory
           command: |
@@ -141,6 +142,8 @@ jobs:
           name: Deploy to Elastic Beanstalk environment
           command: |
             cd src/WingedKeys/
+            ls
+            cat .elasticbeanstalk/config.yml
             eb deploy ece-wingedkeys-<< parameters.env >>-env --staged
 
 workflows:
