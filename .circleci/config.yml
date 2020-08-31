@@ -128,6 +128,9 @@ jobs:
           command: |
             mv src/WingedKeys/dist src/WingedKeys/site
             cd src/WingedKeys/
+            cd site/
+            ls
+            cd ../
             zip -r site.zip site
       - run:
           name: Clean up remainder of deploy directory
