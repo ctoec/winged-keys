@@ -96,8 +96,7 @@ jobs:
             cat appsettings.json
             mv appsettings.json dist/appsettings.json
       - aws-s3/copy:
-          # TODO: Customize by env
-          from: 's3://ece-reporter-staging-store/secrets/wingedkeys/staging-wingedkeys.pfx'
+          from: 's3://ece-reporter-<< parameters.env >>-store/secrets/wingedkeys/<< parameters.env >>-wingedkeys.pfx'
           to: src/WingedKeys/dist/security/
       - add_ssh_keys
       - run:
