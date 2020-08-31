@@ -26,7 +26,7 @@ jobs:
               sudo apt-get install -y dotnet-sdk-3.1
       - run:
           name: Globally install Entity Framework
-          command: dotnet tool install --global dotnet-ef --version 3.1.4
+          command: dotnet tool install --global dotnet-ef --version 3.1.6
       - run:
           name: Add global Dotnet tools to path
           command: echo 'export PATH="$PATH:$HOME/.dotnet/tools/"' >> $BASH_ENV
