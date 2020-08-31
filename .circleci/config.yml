@@ -126,11 +126,7 @@ jobs:
             mv src/WingedKeys/dist src/WingedKeys/site
             cd src/WingedKeys/
             zip -r site.zip site
-            mkdir winged-keys-app
-            mv site.zip winged-keys-app/site.zip
-            mv aws-windows-deployment-manifest.json winged-keys-app/aws-windows-deployment-manifest.json
-            mv .ebextensions winged-keys-app/.ebextensions
-            zip -r winged-keys-app.zip winged-keys-app
+            zip winged-keys-app.zip site.zip aws-windows-deployment-manifest.json
       - run:
           name: Clean up remainder of deploy directory
           command: |
