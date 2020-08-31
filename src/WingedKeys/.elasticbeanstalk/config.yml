@@ -1,2 +1,2 @@
 deploy:
-  artifact: winged-keys-app.zip
+  artifact: site.zip
