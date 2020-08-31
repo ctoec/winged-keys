@@ -126,22 +126,13 @@ jobs:
       - run:
           name: Create deploy bundle for Elastic Beanstalk
           command: |
-            mv src/WingedKeys/dist src/WingedKeys/site
             cd src/WingedKeys/
-            cd site/
-            ls
-            cd ../
-            zip -r site.zip site
-      - run:
-          name: Clean up remainder of deploy directory
-          command: |
-            cd src/WingedKeys/
-            rm -rf site
+            zip -r site.zip dist/
       - run:
           name: Initialize Elastic Beanstalk
           command: |
             cd src/WingedKeys/
-            eb init ece-wingedkeys-<< parameters.env >>-app --region us-east-2 --platform iis-10.0
+            eb init WingedKeys --region us-east-2 --platform 64bit-amazon-linux-2-v2.0.1-running-.net-core
       - run:
           name: Deploy to Elastic Beanstalk environment
           command: |
