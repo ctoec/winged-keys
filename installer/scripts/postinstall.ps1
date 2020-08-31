@@ -1,3 +1,5 @@
+Write-Host "LOOK AT US WE ARE STARTING"
+
 #
 # Touch token file for post deploy start (for debugging purposes only)
 #
@@ -27,3 +29,5 @@ Copy-Item -force C:/inetpub/AspNetCoreWebApps/winged-keys-app/installer/lib/ef.d
 # Touch token file for post deploy end (for debugging purposes only)
 #
 fc > c:/cfn/postinstall-end.txt
+
+Write-Host "LOOK AT US WE ARE ACTUALLY FINISHING"
