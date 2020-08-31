@@ -126,6 +126,9 @@ jobs:
           command: |
             mv src/WingedKeys/dist src/WingedKeys/site
             cd src/WingedKeys/
+            cd site/
+            cat aws-windows-deployment-manifest.json
+            cd ../
             zip -r site.zip site
             mkdir winged-keys-app
             mv site.zip winged-keys-app/site.zip
@@ -146,6 +149,7 @@ jobs:
           name: Deploy to Elastic Beanstalk environment
           command: |
             cd src/WingedKeys/
+            cat aws-windows-deployment-manifest.json
             eb deploy ece-wingedkeys-<< parameters.env >>-env --staged
 
 workflows:
