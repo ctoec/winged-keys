@@ -38,10 +38,10 @@ jobs:
             export ConnectionStrings__WingedKeys=xxx && dotnet-ef --verbose migrations script --idempotent --output winged-keys-wingedkeys-db.sql --context WingedKeysContext --project src/WingedKeys
       - run:
           name: "Compile and bundle the application"
-          command: dotnet publish src/WingedKeys/WingedKeys.csproj --output src/WingedKeys/dist --configuration Release -r linux-x64 --self-contained true
+          command: dotnet publish src/WingedKeys/WingedKeys.csproj --output dist --configuration Release -r linux-x64 --self-contained true
       - run:
           name: "Add installation files to bundled distribution"
-          command: cp -r installer src/WingedKeys/dist/installer
+          command: cp -r installer dist/installer
       - persist_to_workspace:
           root: .
           paths:
@@ -60,7 +60,7 @@ jobs:
       - run:
           name: 'Create security directory'
           command: |
-            cd src/WingedKeys/dist
+            cd dist
             mkdir security
       - run:
           name: Install JQ 
@@ -84,10 +84,10 @@ jobs:
             jq '.Logging.LogLevel.System="Warning"' appsettings.json > temp.json && mv temp.json appsettings.json
             jq '.Logging.Region="us-east-2"' appsettings.json > temp.json && mv temp.json appsettings.json
             cat appsettings.json
-            mv appsettings.json dist/appsettings.json
+            mv appsettings.json ../../dist/appsettings.json
       - aws-s3/copy:
           from: 's3://ece-reporter-<< parameters.env >>-store/secrets/wingedkeys/<< parameters.env >>-wingedkeys.pfx'
-          to: src/WingedKeys/dist/security/
+          to: dist/security/
       - add_ssh_keys
       - run:
           name: 'Put SQL Migrations on Jump Server'
@@ -112,7 +112,7 @@ jobs:
             sudo pip3 install awsebcli
       - run:
           name: Create deploy bundle for Elastic Beanstalk
-          command: zip -r src/WingedKeys/dist.zip src/WingedKeys/dist/
+          command: zip -r dist.zip dist/
       - run:
           name: Initialize Elastic Beanstalk
           command: eb init ece-wingedkeys-<< parameters.env >>-app --region us-east-2 --platform 64bit-amazon-linux-2-v2.0.1-running-.net-core

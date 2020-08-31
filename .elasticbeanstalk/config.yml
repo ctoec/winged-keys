@@ -1,2 +1,2 @@
 deploy:
-  artifact: src/WingedKeys/dist.zip
+  artifact: dist.zip
