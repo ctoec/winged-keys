@@ -41,11 +41,7 @@ jobs:
           command: dotnet publish src/WingedKeys/WingedKeys.csproj --output src/WingedKeys/dist --configuration Release -r linux-x64 --self-contained true
       - run:
           name: "Add installation files to bundled distribution"
-          command: |
-            ls
-            cp installer/aws-windows-deployment-manifest.json src/WingedKeys/dist
-            cp installer/iis/web.config src/WingedKeys/dist
-            cp -r installer src/WingedKeys/dist/installer
+          command: cp -r installer src/WingedKeys/dist/installer
       - persist_to_workspace:
           root: .
           paths:
@@ -129,12 +125,12 @@ jobs:
           command: |
             cd src/WingedKeys/
             eb init WingedKeys --region us-east-2 --platform 64bit-amazon-linux-2-v2.0.1-running-.net-core
-            cat ./elasticbeanstalk/config.yml
+            cat .elasticbeanstalk/config.yml
       - run:
           name: Deploy to Elastic Beanstalk environment
           command: |
             cd src/WingedKeys/
-            cat ./elasticbeanstalk/config.yml
+            cat .elasticbeanstalk/config.yml
             eb deploy ece-wingedkeys-<< parameters.env >>-env --staged
 
 workflows:
