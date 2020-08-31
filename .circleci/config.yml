@@ -58,11 +58,6 @@ jobs:
       - attach_workspace:
           at: .
       - run:
-          name: 'Setup installer for AWS Beanstalk'
-          command: |
-            cd src/WingedKeys/dist
-            cp -r installer/ebextensions ../.ebextensions
-      - run:
           name: 'Create security directory'
           command: |
             cd src/WingedKeys/dist
@@ -117,21 +112,13 @@ jobs:
             sudo pip3 install awsebcli
       - run:
           name: Create deploy bundle for Elastic Beanstalk
-          command: |
-            cd src/WingedKeys/
-            zip -r site.zip dist/
+          command: zip -r src/WingedKeys/dist.zip src/WingedKeys/dist/
       - run:
           name: Initialize Elastic Beanstalk
-          command: |
-            cd src/WingedKeys/
-            eb init WingedKeys --region us-east-2 --platform 64bit-amazon-linux-2-v2.0.1-running-.net-core
-            cat .elasticbeanstalk/config.yml
+          command: eb init ece-wingedkeys-<< parameters.env >>-app --region us-east-2 --platform 64bit-amazon-linux-2-v2.0.1-running-.net-core
       - run:
           name: Deploy to Elastic Beanstalk environment
-          command: |
-            cd src/WingedKeys/
-            cat .elasticbeanstalk/config.yml
-            eb deploy ece-wingedkeys-<< parameters.env >>-env --staged
+          command: eb deploy ece-wingedkeys-<< parameters.env >>-env --staged
 
 workflows:
   build-and-test:
