@@ -42,6 +42,7 @@ jobs:
       - run:
           name: "Add installation files to bundled distribution"
           command: |
+            ls
             cp installer/aws-windows-deployment-manifest.json src/WingedKeys/dist
             cp installer/iis/web.config src/WingedKeys/dist
             cp -r installer src/WingedKeys/dist/installer
@@ -64,6 +65,7 @@ jobs:
           name: 'Setup installer for AWS Beanstalk'
           command: |
             cd src/WingedKeys/dist
+            ls
             cp -f aws-windows-deployment-manifest.json ..
             cp -r installer/ebextensions ../.ebextensions
             cp -f installer/iis/web.config web.config
@@ -81,6 +83,7 @@ jobs:
           # TODO: REMOVE PASSWORDS FROM THIS
           command: |
             cd src/WingedKeys
+            ls
             jq '.AccessTokenLifetime="1800"' appsettings.json > temp.json && mv temp.json appsettings.json
             jq '.BaseUri="https://<< parameters.env >>.ece-wingedkeys.ctoecskylight.com"' appsettings.json > temp.json && mv temp.json appsettings.json
             jq '.CertificateFileName="security/<< parameters.env >>-wingedkeys.pfx"' appsettings.json > temp.json && mv temp.json appsettings.json
