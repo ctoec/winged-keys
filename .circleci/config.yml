@@ -79,7 +79,7 @@ jobs:
       - run:
           name: "Deploy the application"
           command: |
-            cd src/Wingedkeys
+            cd src/WingedKeys
             dotnet eb deploy-environment
 
   run-migrations:
