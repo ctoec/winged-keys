@@ -110,7 +110,7 @@ jobs:
             ssh ubuntu@<< parameters.env >>.ece-jumpserver.ctoecskylight.com "cd /home/ubuntu/stage/wingedkeys/ && rm winged-keys-configuration-db.sql winged-keys-persisted-db.sql winged-keys-wingedkeys-db.sql"
 
 workflows:
-  build-and-test:
+  deploy-to-staging:
     jobs:
       - deploy:
           env: staging

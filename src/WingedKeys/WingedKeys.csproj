@@ -9,6 +9,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Content Update="*.pfx" CopyToOutputDirectory="PreserveNewest" />
     <BuiltProjectOutputGroupOutput Include="$(ProjectRuntimeConfigFilePath)">
       <FinalOutputPath>$(ProjectRuntimeConfigFilePath)</FinalOutputPath>
     </BuiltProjectOutputGroupOutput>
