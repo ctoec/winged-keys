@@ -125,10 +125,6 @@ jobs:
           name: 'Remove Migrations from Jump Server'
           command: |
             ssh ubuntu@<< parameters.env >>.ece-jumpserver.ctoecskylight.com "cd /home/ubuntu/stage/wingedkeys/ && rm winged-keys-configuration-db.sql winged-keys-persisted-db.sql winged-keys-wingedkeys-db.sql"
-      - persist_to_workspace:
-          root: .
-          paths:
-            - .
 
 workflows:
   build-and-test:
