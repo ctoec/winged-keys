@@ -54,7 +54,9 @@ jobs:
       - checkout
       - run:
           name: "Compile and bundle the application"
-          command: dotnet publish src/WingedKeys/WingedKeys.csproj --output dist --configuration Release -r linux-x64 --self-contained true
+          command: |
+            echo 'export PATH="$PATH:$HOME/.dotnet/tools/"' >> $BASH_ENV
+            dotnet publish src/WingedKeys/WingedKeys.csproj --output dist --configuration Release -r linux-x64 --self-contained true
       - run:
           name: "Add installation files to bundled distribution"
           command: |
