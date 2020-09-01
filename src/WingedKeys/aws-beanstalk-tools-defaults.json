@@ -1,0 +1,5 @@
+{
+  "region": "us-east-2",
+  "application": "ece-wingedkeys-devsecure-app",
+  "environment": "ece-wingedkeys-devsecure-env"
+}
