@@ -145,7 +145,8 @@ jobs:
 workflows:
   build-and-test:
     jobs:
-      - build
+      - build:
+          env: staging
       - deploy:
           env: staging
           requires:
@@ -155,7 +156,8 @@ workflows:
               only: master
   deploy-to-devsecure:
     jobs:
-      - build
+      - build:
+          env: devsecure
       - run-migrations:
           env: devsecure
           requires:
@@ -168,7 +170,8 @@ workflows:
     jobs:
       - hold:
           type: approval
-      - build
+      - build:
+          env: qa
       - deploy:
           env: qa
           requires:
