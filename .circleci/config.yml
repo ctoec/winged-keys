@@ -1,7 +1,6 @@
 version: 2.1
 
 orbs:
-  win: circleci/windows@2.2.0
   aws-s3: circleci/aws-s3@1.0.16
 
 jobs:
@@ -145,6 +144,8 @@ workflows:
               only: master
   deploy-to-devsecure:
     jobs:
+      - hold:
+          type: approval
       - prep:
           env: devsecure
       - deploy:
@@ -165,3 +166,7 @@ workflows:
           env: qa
           requires:
             - prep
+      - run-migrations:
+          env: qa
+          requires:
+            - deploy
