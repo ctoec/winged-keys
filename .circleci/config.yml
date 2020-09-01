@@ -36,7 +36,7 @@ jobs:
           command: echo 'export PATH="$PATH:$HOME/.dotnet/tools/"' >> $BASH_ENV
       - run:
           name: "Compile and bundle the application"
-          command: dotnet publish src/WingedKeys/WingedKeys.csproj --output dist --configuration Release -r linux-x64 --self-contained true
+          command: dotnet publish src/WingedKeys/WingedKeys.csproj --output dist --configuration Release --no-self-contained
       - run:
           name: "Add installation files to bundled distribution"
           command: |
@@ -108,7 +108,7 @@ jobs:
           command: eb init ece-wingedkeys-<< parameters.env >>-app --region us-east-2 --platform 64bit-amazon-linux-2-v2.0.1-running-.net-core
       - run:
           name: Deploy to Elastic Beanstalk environment
-          command: eb deploy ece-wingedkeys-<< parameters.env >>-env --staged
+          command: eb deploy ece-wingedkeys-<< parameters.env >>-env --staged --debug
 
   run-migrations:
     machine:
