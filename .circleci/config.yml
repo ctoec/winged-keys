@@ -66,28 +66,7 @@ jobs:
       - aws-s3/copy:
           from: 's3://ece-reporter-<< parameters.env >>-store/secrets/wingedkeys/<< parameters.env >>-wingedkeys.pfx'
           to: src/WingedKeys/
-      - run:
-          name: "Deploy the application"
-          command: |
-            cd src/WingedKeys
-            cat aws-beanstalk-tools-defaults.json
-            cat appsettings.json
-            dotnet eb deploy-environment
-
-  run-migrations:
-    machine:
-      image: ubuntu-1604:202007-01 
-    parameters:
-      env:
-        description: "The environment to deploy Winged Keys to (qa, devsecure, staging)"
-        type: string
-    steps:
-      - attach_workspace:
-          at: .
       - add_ssh_keys
-      - run:
-          name: Add global Dotnet tools to path
-          command: echo 'export PATH="$PATH:$HOME/.dotnet/tools/"' >> $BASH_ENV
       - run:
           name: Generate Migrations
           command: |
@@ -108,6 +87,13 @@ jobs:
           name: 'Remove Migrations from Jump Server'
           command: |
             ssh ubuntu@<< parameters.env >>.ece-jumpserver.ctoecskylight.com "cd /home/ubuntu/stage/wingedkeys/ && rm winged-keys-configuration-db.sql winged-keys-persisted-db.sql winged-keys-wingedkeys-db.sql"
+      - run:
+          name: "Deploy the application"
+          command: |
+            cd src/WingedKeys
+            cat aws-beanstalk-tools-defaults.json
+            cat appsettings.json
+            dotnet eb deploy-environment
 
 workflows:
   deploy-to-staging:
@@ -125,10 +111,6 @@ workflows:
           env: devsecure
           requires:
             - hold
-      - run-migrations:
-          env: devsecure
-          requires:
-            - deploy
   deploy-to-qa:
     jobs:
       - hold:
@@ -137,7 +119,3 @@ workflows:
           env: qa
           requires:
             - hold
-      - run-migrations:
-          env: qa
-          requires:
-            - deploy
