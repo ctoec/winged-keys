@@ -157,6 +157,7 @@ workflows:
     jobs:
       - build
       - run-migrations:
+          env: devsecure
           requires:
             - build
       - deploy:
