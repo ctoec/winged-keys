@@ -67,7 +67,7 @@ namespace WingedKeys
 					if (environment != Environments.Development)
 					{
 						logging.AddAWSProvider(context.Configuration.GetAWSLoggingConfigSection());
-						logging.AddEventLog();
+						// logging.AddEventLog();
 					}
 
 			})
