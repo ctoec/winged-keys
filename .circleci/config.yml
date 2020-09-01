@@ -47,6 +47,36 @@ jobs:
           paths:
             - .
 
+  run-migrations:
+    machine:
+      image: ubuntu-1604:202007-01 
+    parameters:
+      env:
+        description: "The environment to deploy Winged Keys to (qa, devsecure, staging)"
+        type: string
+    steps:
+      - attach_workspace:
+          at: .
+      - add_ssh_keys
+      - run:
+          name: 'Put SQL Migrations on Jump Server'
+          command: |
+            scp winged-keys-configuration-db.sql ubuntu@<< parameters.env >>.ece-jumpserver.ctoecskylight.com:/home/ubuntu/stage/wingedkeys/
+            scp winged-keys-persisted-db.sql ubuntu@<< parameters.env >>.ece-jumpserver.ctoecskylight.com:/home/ubuntu/stage/wingedkeys/
+            scp winged-keys-wingedkeys-db.sql ubuntu@<< parameters.env >>.ece-jumpserver.ctoecskylight.com:/home/ubuntu/stage/wingedkeys/
+      - run:
+          name: 'Run SQL Migrations'
+          command: |
+            ssh ubuntu@<< parameters.env >>.ece-jumpserver.ctoecskylight.com "cd /home/ubuntu/stage/wingedkeys/ && /home/ubuntu/scripts/db-migrate-wingedkeys.sh winged-keys-configuration-db.sql && /home/ubuntu/scripts/db-migrate-wingedkeys.sh winged-keys-persisted-db.sql && /home/ubuntu/scripts/db-migrate-wingedkeys.sh winged-keys-wingedkeys-db.sql"
+      - run:
+          name: 'Remove Migrations from Jump Server'
+          command: |
+            ssh ubuntu@<< parameters.env >>.ece-jumpserver.ctoecskylight.com "cd /home/ubuntu/stage/wingedkeys/ && rm winged-keys-configuration-db.sql winged-keys-persisted-db.sql winged-keys-wingedkeys-db.sql"
+      - persist_to_workspace:
+          root: .
+          paths:
+            - .
+
   deploy:
     machine:
       image: ubuntu-1604:202007-01 
@@ -88,21 +118,6 @@ jobs:
       - aws-s3/copy:
           from: 's3://ece-reporter-<< parameters.env >>-store/secrets/wingedkeys/<< parameters.env >>-wingedkeys.pfx'
           to: dist/security/
-      - add_ssh_keys
-      - run:
-          name: 'Put SQL Migrations on Jump Server'
-          command: |
-            scp winged-keys-configuration-db.sql ubuntu@<< parameters.env >>.ece-jumpserver.ctoecskylight.com:/home/ubuntu/stage/wingedkeys/
-            scp winged-keys-persisted-db.sql ubuntu@<< parameters.env >>.ece-jumpserver.ctoecskylight.com:/home/ubuntu/stage/wingedkeys/
-            scp winged-keys-wingedkeys-db.sql ubuntu@<< parameters.env >>.ece-jumpserver.ctoecskylight.com:/home/ubuntu/stage/wingedkeys/
-      - run:
-          name: 'Run SQL Migrations'
-          command: |
-            ssh ubuntu@<< parameters.env >>.ece-jumpserver.ctoecskylight.com "cd /home/ubuntu/stage/wingedkeys/ && /home/ubuntu/scripts/db-migrate-wingedkeys.sh winged-keys-configuration-db.sql && /home/ubuntu/scripts/db-migrate-wingedkeys.sh winged-keys-persisted-db.sql && /home/ubuntu/scripts/db-migrate-wingedkeys.sh winged-keys-wingedkeys-db.sql"
-      - run:
-          name: 'Remove Migrations from Jump Server'
-          command: |
-            ssh ubuntu@<< parameters.env >>.ece-jumpserver.ctoecskylight.com "cd /home/ubuntu/stage/wingedkeys/ && rm winged-keys-configuration-db.sql winged-keys-persisted-db.sql winged-keys-wingedkeys-db.sql"
       - run:
           name: Install Elastic Beanstalk CLI
           working_directory: /
@@ -134,10 +149,13 @@ workflows:
   deploy-to-devsecure:
     jobs:
       - build
+      - run-migrations:
+          requires:
+            - build
       - deploy:
           env: devsecure
           requires:
-            - build
+            - run-migrations
   deploy-to-qa:
     jobs:
       - hold:
