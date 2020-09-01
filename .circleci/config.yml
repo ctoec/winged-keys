@@ -42,14 +42,15 @@ jobs:
           command: |
             cp -r installer dist/installer
             cd dist/
-            ls
-            cd bin/
-            ls
-            cd ../
             cp WingedKeys.runtimeconfig.json winged-keys-app.runtimeconfig.json
             cp WingedKeys.runtimeconfig.json ece-wingedkeys-<< parameters.env >>-app.runtimeconfig.json
             cp WingedKeys.runtimeconfig.json ece-wingedkeys-<< parameters.env >>-env.runtimeconfig.json
             cp WingedKeys.runtimeconfig.json .runtimeconfig.json
+            cp WingedKeys.runtimeconfig.json ../WingedKeys.runtimeconfig.json
+            cp WingedKeys.runtimeconfig.json ../winged-keys-app.runtimeconfig.json
+            cp WingedKeys.runtimeconfig.json ../ece-wingedkeys-<< parameters.env >>-app.runtimeconfig.json
+            cp WingedKeys.runtimeconfig.json ../ece-wingedkeys-<< parameters.env >>-env.runtimeconfig.json
+            cp WingedKeys.runtimeconfig.json ../.runtimeconfig.json
             ls
       - run:
           name: 'Create security directory'
