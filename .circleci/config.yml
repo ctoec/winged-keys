@@ -148,6 +148,8 @@ workflows:
           type: approval
       - prep:
           env: devsecure
+          requires: 
+            - hold
       - deploy:
           env: devsecure
           requires:
@@ -162,6 +164,8 @@ workflows:
           type: approval
       - prep:
           env: qa
+          requires: 
+            - hold
       - deploy:
           env: qa
           requires:
