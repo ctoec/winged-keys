@@ -94,6 +94,9 @@ jobs:
           at: .
       - add_ssh_keys
       - run:
+          name: Add global Dotnet tools to path
+          command: echo 'export PATH="$PATH:$HOME/.dotnet/tools/"' >> $BASH_ENV
+      - run:
           name: Generate Migrations
           command: |
             export ConnectionStrings__WingedKeys=xxx && dotnet-ef --verbose migrations script --idempotent --output winged-keys-persisted-db.sql --context PersistedGrantDbContext --project src/WingedKeys
