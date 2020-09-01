@@ -5,6 +5,45 @@ orbs:
   aws-s3: circleci/aws-s3@1.0.16
 
 jobs:
+  prep:
+    machine:
+      image: ubuntu-1604:202007-01 
+    parameters:
+      env:
+        description: "The environment to deploy Winged Keys to (qa, devsecure, staging)"
+        type: string
+    steps:
+      - checkout
+      - run:
+          name: 'Create security directory'
+          command: |
+            cd src/WingedKeys
+            mkdir security
+      - run:
+          name: Install JQ 
+          command: sudo apt-get install jq
+      - run:
+          name: 'Update Appsettings with environment specific variables'
+          # TODO: REMOVE PASSWORDS FROM THIS
+          command: |
+            cd src/WingedKeys
+            jq '.AccessTokenLifetime="1800"' appsettings.json > temp.json && mv temp.json appsettings.json
+            jq '.BaseUri="https://<< parameters.env >>.ece-wingedkeys.ctoecskylight.com"' appsettings.json > temp.json && mv temp.json appsettings.json
+            jq '.CertificateFileName="security/<< parameters.env >>-wingedkeys.pfx"' appsettings.json > temp.json && mv temp.json appsettings.json
+            jq '.CertificatePassword="f7u7vC3vxEY9bKBWoMSBMI5trFD1Ffo3kQ=="' appsettings.json > temp.json && mv temp.json appsettings.json
+            jq '.ClientUris="https://<< parameters.env >>.ece-hedwig.ctoecskylight.com,https://localhost:5001,https://<< parameters.env >>.ece-fawkes.ctoecskylight.com"' appsettings.json > temp.json && mv temp.json appsettings.json
+            jq '.ConnectionStrings.WINGEDKEYS="Server=<< parameters.env >>.ece-db.ctoecskylight.com;Database=wingedkeys;User Id=admin;Password=Z6EUX_123GwEq_HMVZN_;"' appsettings.json > temp.json && mv temp.json appsettings.json
+            jq '.EnvironmentName="<< parameters.env >>"' appsettings.json > temp.json && mv temp.json appsettings.json
+            jq '.Logging.LogGroup="/aws/elasticbeanstalk/ece-wingedkeys-<< parameters.env >>-env/app-log"' appsettings.json > temp.json && mv temp.json appsettings.json
+            jq '.Logging.LogLevel.Default="Information"' appsettings.json > temp.json && mv temp.json appsettings.json
+            jq '.Logging.LogLevel.Microsoft="Warning"' appsettings.json > temp.json && mv temp.json appsettings.json
+            jq '.Logging.LogLevel.System="Warning"' appsettings.json > temp.json && mv temp.json appsettings.json
+            jq '.Logging.Region="us-east-2"' appsettings.json > temp.json && mv temp.json appsettings.json
+            cat appsettings.json
+      - aws-s3/copy:
+          from: 's3://ece-reporter-<< parameters.env >>-store/secrets/wingedkeys/<< parameters.env >>-wingedkeys.pfx'
+          to: src/WingedKeys/security/
+      
   build:
     machine:
       image: ubuntu-1604:202007-01 
@@ -32,88 +71,16 @@ jobs:
           name: Globally install Entity Framework
           command: dotnet tool install --global dotnet-ef --version 3.1.6
       - run:
+          name: Globally install Elastic Beanstalk tools
+          command: dotnet tool install -g Amazon.ElasticBeanstalk.Tools
+      - run:
           name: Add global Dotnet tools to path
           command: echo 'export PATH="$PATH:$HOME/.dotnet/tools/"' >> $BASH_ENV
       - run:
-          name: "Compile and bundle the application"
-          command: dotnet publish src/WingedKeys/WingedKeys.csproj --output dist --configuration Release --no-self-contained
-      - run:
-          name: "Add installation files to bundled distribution"
+          name: "Deploy the application"
           command: |
-            cp -r installer dist/installer
-            cd dist/
-            cp WingedKeys.runtimeconfig.json winged-keys-app.runtimeconfig.json
-            cp WingedKeys.runtimeconfig.json ece-wingedkeys-<< parameters.env >>-app.runtimeconfig.json
-            cp WingedKeys.runtimeconfig.json ece-wingedkeys-<< parameters.env >>-env.runtimeconfig.json
-            cp WingedKeys.runtimeconfig.json .runtimeconfig.json
-            cp WingedKeys.runtimeconfig.json ../WingedKeys.runtimeconfig.json
-            cp WingedKeys.runtimeconfig.json ../winged-keys-app.runtimeconfig.json
-            cp WingedKeys.runtimeconfig.json ../ece-wingedkeys-<< parameters.env >>-app.runtimeconfig.json
-            cp WingedKeys.runtimeconfig.json ../ece-wingedkeys-<< parameters.env >>-env.runtimeconfig.json
-            cp WingedKeys.runtimeconfig.json ../.runtimeconfig.json
-            ls
-      - run:
-          name: 'Create security directory'
-          command: |
-            cd dist
-            mkdir security
-      - run:
-          name: Install JQ 
-          command: sudo apt-get install jq
-      - run:
-          name: 'Update Appsettings with environment specific variables'
-          # TODO: REMOVE PASSWORDS FROM THIS
-          command: |
-            cd src/WingedKeys
-            ls
-            jq '.AccessTokenLifetime="1800"' appsettings.json > temp.json && mv temp.json appsettings.json
-            jq '.BaseUri="https://<< parameters.env >>.ece-wingedkeys.ctoecskylight.com"' appsettings.json > temp.json && mv temp.json appsettings.json
-            jq '.CertificateFileName="security/<< parameters.env >>-wingedkeys.pfx"' appsettings.json > temp.json && mv temp.json appsettings.json
-            jq '.CertificatePassword="f7u7vC3vxEY9bKBWoMSBMI5trFD1Ffo3kQ=="' appsettings.json > temp.json && mv temp.json appsettings.json
-            jq '.ClientUris="https://<< parameters.env >>.ece-hedwig.ctoecskylight.com,https://localhost:5001,https://<< parameters.env >>.ece-fawkes.ctoecskylight.com"' appsettings.json > temp.json && mv temp.json appsettings.json
-            jq '.ConnectionStrings.WINGEDKEYS="Server=<< parameters.env >>.ece-db.ctoecskylight.com;Database=wingedkeys;User Id=admin;Password=Z6EUX_123GwEq_HMVZN_;"' appsettings.json > temp.json && mv temp.json appsettings.json
-            jq '.EnvironmentName="<< parameters.env >>"' appsettings.json > temp.json && mv temp.json appsettings.json
-            jq '.Logging.LogGroup="/aws/elasticbeanstalk/ece-wingedkeys-<< parameters.env >>-env/app-log"' appsettings.json > temp.json && mv temp.json appsettings.json
-            jq '.Logging.LogLevel.Default="Information"' appsettings.json > temp.json && mv temp.json appsettings.json
-            jq '.Logging.LogLevel.Microsoft="Warning"' appsettings.json > temp.json && mv temp.json appsettings.json
-            jq '.Logging.LogLevel.System="Warning"' appsettings.json > temp.json && mv temp.json appsettings.json
-            jq '.Logging.Region="us-east-2"' appsettings.json > temp.json && mv temp.json appsettings.json
-            cat appsettings.json
-            mv appsettings.json ../../dist/appsettings.json
-      - aws-s3/copy:
-          from: 's3://ece-reporter-<< parameters.env >>-store/secrets/wingedkeys/<< parameters.env >>-wingedkeys.pfx'
-          to: dist/security/
-      - run:
-          name: Create deploy bundle for Elastic Beanstalk
-          command: zip -r dist.zip dist/
-      - persist_to_workspace:
-          root: .
-          paths:
-            - .
-
-  deploy:
-    machine:
-      image: ubuntu-1604:202007-01 
-    parameters:
-      env:
-        description: "The environment to deploy Winged Keys to (qa, devsecure, staging)"
-        type: string
-    steps:
-      - attach_workspace:
-          at: .
-      - run:
-          name: Install Elastic Beanstalk CLI
-          working_directory: /
-          command: |
-            sudo apt-get -y -qq update
-            sudo apt-get install python3-pip python3-dev build-essential
-            sudo pip3 install awsebcli
-      - run:
-          name: Initialize Elastic Beanstalk
-          command: eb init ece-wingedkeys-<< parameters.env >>-app --region us-east-2 --platform 64bit-amazon-linux-2-v2.0.1-running-.net-core
-      - run:
-          name: Deploy to Elastic Beanstalk environment
-          command: eb deploy ece-wingedkeys-<< parameters.env >>-env --staged --debug
+            cd src/Wingedkeys
+            dotnet eb deploy-environment
 
   run-migrations:
     machine:
@@ -154,23 +121,23 @@ jobs:
 workflows:
   build-and-test:
     jobs:
-      - build:
+      - prep:
           env: staging
       - deploy:
           env: staging
           requires:
-            - build
+            - prep
           filters:
             branches:
               only: master
   deploy-to-devsecure:
     jobs:
-      - build:
+      - prep:
           env: devsecure
       - deploy:
           env: devsecure
           requires:
-            - build
+            - prep
       - run-migrations:
           env: devsecure
           requires:
@@ -179,9 +146,9 @@ workflows:
     jobs:
       - hold:
           type: approval
-      - build:
+      - prep:
           env: qa
       - deploy:
           env: qa
           requires:
-            - build
+            - prep
