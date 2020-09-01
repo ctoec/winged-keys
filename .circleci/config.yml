@@ -62,7 +62,6 @@ jobs:
         description: "The environment to deploy Winged Keys to (qa, devsecure, staging)"
         type: string
     steps:
-      - checkout
       - run:
           name: Manually install the .NET SDK
           command: |
