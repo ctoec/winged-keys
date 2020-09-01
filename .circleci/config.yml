@@ -41,7 +41,14 @@ jobs:
           command: dotnet publish src/WingedKeys/WingedKeys.csproj --output dist --configuration Release -r linux-x64 --self-contained true
       - run:
           name: "Add installation files to bundled distribution"
-          command: cp -r installer dist/installer
+          command: |
+            cp -r installer dist/installer
+            cd dist/
+            cp WingedKeys.runtimeconfig.json winged-keys-app.runtimeconfig.json
+            cp WingedKeys.runtimeconfig.json ece-wingedkeys-<< parameters.env >>-app.runtimeconfig.json
+            cp WingedKeys.runtimeconfig.json ece-wingedkeys-<< parameters.env >>-env.runtimeconfig.json
+            cp WingedKeys.runtimeconfig.json .runtimeconfig.json
+            ls
       - persist_to_workspace:
           root: .
           paths:
