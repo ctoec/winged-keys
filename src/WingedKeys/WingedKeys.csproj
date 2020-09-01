@@ -9,7 +9,10 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Content Update="*.pfx" CopyToOutputDirectory="PreserveNewest" />
+    <!--  For insertion of security certificate during non-local deploys  -->
+    <Content Update="*.pfx" CopyToPublishDirectory="Always" />
+    <None Update="*.pfx" CopyToOutputDirectory="Always" />
+
     <BuiltProjectOutputGroupOutput Include="$(ProjectRuntimeConfigFilePath)">
       <FinalOutputPath>$(ProjectRuntimeConfigFilePath)</FinalOutputPath>
     </BuiltProjectOutputGroupOutput>
