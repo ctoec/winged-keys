@@ -5,15 +5,10 @@ orbs:
   aws-s3: circleci/aws-s3@1.0.16
 
 jobs:
-  build:
+  install:
     machine:
       image: ubuntu-1604:202007-01 
-    parameters:
-      env:
-        description: "The environment to deploy Winged Keys to (qa, devsecure, staging)"
-        type: string
     steps:
-      - checkout
       - run:
           name: Manually install the .NET SDK
           command: |
@@ -35,11 +30,28 @@ jobs:
           name: Add global Dotnet tools to path
           command: echo 'export PATH="$PATH:$HOME/.dotnet/tools/"' >> $BASH_ENV
       - run:
-          name: Generate Migrations
+          name: Install Elastic Beanstalk CLI
+          working_directory: /
           command: |
-            export ConnectionStrings__WingedKeys=xxx && dotnet-ef --verbose migrations script --idempotent --output winged-keys-persisted-db.sql --context PersistedGrantDbContext --project src/WingedKeys
-            export ConnectionStrings__WingedKeys=xxx && dotnet-ef --verbose migrations script --idempotent --output winged-keys-configuration-db.sql --context ConfigurationDbContext --project src/WingedKeys
-            export ConnectionStrings__WingedKeys=xxx && dotnet-ef --verbose migrations script --idempotent --output winged-keys-wingedkeys-db.sql --context WingedKeysContext --project src/WingedKeys
+            sudo apt-get -y -qq update
+            sudo apt-get install python3-pip python3-dev build-essential
+            sudo pip3 install awsebcli
+      - persist_to_workspace:
+          root: .
+          paths:
+            - .
+
+  build:
+    machine:
+      image: ubuntu-1604:202007-01 
+    parameters:
+      env:
+        description: "The environment to deploy Winged Keys to (qa, devsecure, staging)"
+        type: string
+    steps:
+      - attach_workspace:
+          at: .
+      - checkout
       - run:
           name: "Compile and bundle the application"
           command: dotnet publish src/WingedKeys/WingedKeys.csproj --output dist --configuration Release -r linux-x64 --self-contained true
@@ -53,51 +65,6 @@ jobs:
             cp WingedKeys.runtimeconfig.json ece-wingedkeys-<< parameters.env >>-env.runtimeconfig.json
             cp WingedKeys.runtimeconfig.json .runtimeconfig.json
             ls
-      - persist_to_workspace:
-          root: .
-          paths:
-            - .
-
-  run-migrations:
-    machine:
-      image: ubuntu-1604:202007-01 
-    parameters:
-      env:
-        description: "The environment to deploy Winged Keys to (qa, devsecure, staging)"
-        type: string
-    steps:
-      - attach_workspace:
-          at: .
-      - add_ssh_keys
-      - run:
-          name: 'Put SQL Migrations on Jump Server'
-          command: |
-            scp winged-keys-configuration-db.sql ubuntu@<< parameters.env >>.ece-jumpserver.ctoecskylight.com:/home/ubuntu/stage/wingedkeys/
-            scp winged-keys-persisted-db.sql ubuntu@<< parameters.env >>.ece-jumpserver.ctoecskylight.com:/home/ubuntu/stage/wingedkeys/
-            scp winged-keys-wingedkeys-db.sql ubuntu@<< parameters.env >>.ece-jumpserver.ctoecskylight.com:/home/ubuntu/stage/wingedkeys/
-      - run:
-          name: 'Run SQL Migrations'
-          command: |
-            ssh ubuntu@<< parameters.env >>.ece-jumpserver.ctoecskylight.com "cd /home/ubuntu/stage/wingedkeys/ && /home/ubuntu/scripts/db-migrate-wingedkeys.sh winged-keys-configuration-db.sql && /home/ubuntu/scripts/db-migrate-wingedkeys.sh winged-keys-persisted-db.sql && /home/ubuntu/scripts/db-migrate-wingedkeys.sh winged-keys-wingedkeys-db.sql"
-      - run:
-          name: 'Remove Migrations from Jump Server'
-          command: |
-            ssh ubuntu@<< parameters.env >>.ece-jumpserver.ctoecskylight.com "cd /home/ubuntu/stage/wingedkeys/ && rm winged-keys-configuration-db.sql winged-keys-persisted-db.sql winged-keys-wingedkeys-db.sql"
-      - persist_to_workspace:
-          root: .
-          paths:
-            - .
-
-  deploy:
-    machine:
-      image: ubuntu-1604:202007-01 
-    parameters:
-      env:
-        description: "The environment to deploy Winged Keys to (qa, devsecure, staging)"
-        type: string
-    steps:
-      - attach_workspace:
-          at: .
       - run:
           name: 'Create security directory'
           command: |
@@ -130,15 +97,23 @@ jobs:
           from: 's3://ece-reporter-<< parameters.env >>-store/secrets/wingedkeys/<< parameters.env >>-wingedkeys.pfx'
           to: dist/security/
       - run:
-          name: Install Elastic Beanstalk CLI
-          working_directory: /
-          command: |
-            sudo apt-get -y -qq update
-            sudo apt-get install python3-pip python3-dev build-essential
-            sudo pip3 install awsebcli
-      - run:
           name: Create deploy bundle for Elastic Beanstalk
           command: zip -r dist.zip dist/
+      - persist_to_workspace:
+          root: .
+          paths:
+            - .
+
+  deploy:
+    machine:
+      image: ubuntu-1604:202007-01 
+    parameters:
+      env:
+        description: "The environment to deploy Winged Keys to (qa, devsecure, staging)"
+        type: string
+    steps:
+      - attach_workspace:
+          at: .
       - run:
           name: Initialize Elastic Beanstalk
           command: eb init ece-wingedkeys-<< parameters.env >>-app --region us-east-2 --platform 64bit-amazon-linux-2-v2.0.1-running-.net-core
@@ -146,11 +121,50 @@ jobs:
           name: Deploy to Elastic Beanstalk environment
           command: eb deploy ece-wingedkeys-<< parameters.env >>-env --staged
 
+  run-migrations:
+    machine:
+      image: ubuntu-1604:202007-01 
+    parameters:
+      env:
+        description: "The environment to deploy Winged Keys to (qa, devsecure, staging)"
+        type: string
+    steps:
+      - attach_workspace:
+          at: .
+      - add_ssh_keys
+      - run:
+          name: Generate Migrations
+          command: |
+            export ConnectionStrings__WingedKeys=xxx && dotnet-ef --verbose migrations script --idempotent --output winged-keys-persisted-db.sql --context PersistedGrantDbContext --project src/WingedKeys
+            export ConnectionStrings__WingedKeys=xxx && dotnet-ef --verbose migrations script --idempotent --output winged-keys-configuration-db.sql --context ConfigurationDbContext --project src/WingedKeys
+            export ConnectionStrings__WingedKeys=xxx && dotnet-ef --verbose migrations script --idempotent --output winged-keys-wingedkeys-db.sql --context WingedKeysContext --project src/WingedKeys
+      - run:
+          name: 'Put SQL Migrations on Jump Server'
+          command: |
+            scp winged-keys-configuration-db.sql ubuntu@<< parameters.env >>.ece-jumpserver.ctoecskylight.com:/home/ubuntu/stage/wingedkeys/
+            scp winged-keys-persisted-db.sql ubuntu@<< parameters.env >>.ece-jumpserver.ctoecskylight.com:/home/ubuntu/stage/wingedkeys/
+            scp winged-keys-wingedkeys-db.sql ubuntu@<< parameters.env >>.ece-jumpserver.ctoecskylight.com:/home/ubuntu/stage/wingedkeys/
+      - run:
+          name: 'Run SQL Migrations'
+          command: |
+            ssh ubuntu@<< parameters.env >>.ece-jumpserver.ctoecskylight.com "cd /home/ubuntu/stage/wingedkeys/ && /home/ubuntu/scripts/db-migrate-wingedkeys.sh winged-keys-configuration-db.sql && /home/ubuntu/scripts/db-migrate-wingedkeys.sh winged-keys-persisted-db.sql && /home/ubuntu/scripts/db-migrate-wingedkeys.sh winged-keys-wingedkeys-db.sql"
+      - run:
+          name: 'Remove Migrations from Jump Server'
+          command: |
+            ssh ubuntu@<< parameters.env >>.ece-jumpserver.ctoecskylight.com "cd /home/ubuntu/stage/wingedkeys/ && rm winged-keys-configuration-db.sql winged-keys-persisted-db.sql winged-keys-wingedkeys-db.sql"
+      - persist_to_workspace:
+          root: .
+          paths:
+            - .
+
 workflows:
   build-and-test:
     jobs:
+      - install
       - build:
           env: staging
+          requires:
+            - install
       - deploy:
           env: staging
           requires:
@@ -160,22 +174,28 @@ workflows:
               only: master
   deploy-to-devsecure:
     jobs:
+      - install
       - build:
           env: devsecure
-      - run-migrations:
-          env: devsecure
           requires:
-            - build
+            - install
       - deploy:
           env: devsecure
           requires:
-            - run-migrations
+            - build
+      - run-migrations:
+          env: devsecure
+          requires:
+            - deploy
   deploy-to-qa:
     jobs:
       - hold:
           type: approval
+      - install
       - build:
           env: qa
+          requires:
+            - install
       - deploy:
           env: qa
           requires:
