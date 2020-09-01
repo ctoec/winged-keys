@@ -44,7 +44,7 @@ jobs:
           from: 's3://ece-reporter-<< parameters.env >>-store/secrets/wingedkeys/<< parameters.env >>-wingedkeys.pfx'
           to: src/WingedKeys/security/
       
-  build:
+  deploy:
     machine:
       image: ubuntu-1604:202007-01 
     parameters:
