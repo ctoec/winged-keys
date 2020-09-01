@@ -28,14 +28,11 @@ jobs:
               sudo apt-get update && \
               sudo apt-get install -y dotnet-sdk-3.1
       - run:
-          name: Globally install Entity Framework
-          command: dotnet tool install --global dotnet-ef --version 3.1.6
-      - run:
-          name: Globally install Elastic Beanstalk tools
-          command: dotnet tool install -g Amazon.ElasticBeanstalk.Tools
-      - run:
-          name: Add global Dotnet tools to path
-          command: echo 'export PATH="$PATH:$HOME/.dotnet/tools/"' >> $BASH_ENV
+          name: Install Global .NET Tools (Entity Framework & Elastic Beanstalk)
+          command: |
+            dotnet tool install --global dotnet-ef --version 3.1.6
+            dotnet tool install --global Amazon.ElasticBeanstalk.Tools
+            echo 'export PATH="$PATH:$HOME/.dotnet/tools/"' >> $BASH_ENV
       - run:
           name: Install JQ 
           command: sudo apt-get install jq
@@ -49,7 +46,7 @@ jobs:
             jq '.CertificateFileName="<< parameters.env >>-wingedkeys.pfx"' appsettings.json > temp.json && mv temp.json appsettings.json
             jq '.CertificatePassword="f7u7vC3vxEY9bKBWoMSBMI5trFD1Ffo3kQ=="' appsettings.json > temp.json && mv temp.json appsettings.json
             jq '.ClientUris="https://<< parameters.env >>.ece-hedwig.ctoecskylight.com,https://localhost:5001,https://<< parameters.env >>.ece-fawkes.ctoecskylight.com"' appsettings.json > temp.json && mv temp.json appsettings.json
-            jq '.ConnectionStrings.WINGEDKEYS="Server=<< parameters.env >>.ece-db.ctoecskylight.com;Database=wingedkeys;User Id=admin;Password=Z6EUX_123GwEq_HMVZN_;"' appsettings.json > temp.json && mv temp.json appsettings.json
+            jq '.ConnectionStrings.WINGEDKEYS="Server=<< parameters.env >>.ece-wingedkeys.ctoecskylight.com;Database=wingedkeys;User Id=admin;Password=Z6EUX_123GwEq_HMVZN_;"' appsettings.json > temp.json && mv temp.json appsettings.json
             jq '.EnvironmentName="<< parameters.env >>"' appsettings.json > temp.json && mv temp.json appsettings.json
             jq '.Logging.LogGroup="/aws/elasticbeanstalk/ece-wingedkeys-<< parameters.env >>-env/app-log"' appsettings.json > temp.json && mv temp.json appsettings.json
             jq '.Logging.LogLevel.Default="Information"' appsettings.json > temp.json && mv temp.json appsettings.json
