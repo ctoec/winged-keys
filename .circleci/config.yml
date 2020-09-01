@@ -89,6 +89,7 @@ jobs:
           name: "Deploy the application"
           command: |
             cd src/WingedKeys
+            cat aws-beanstalk-tools-defaults.json
             dotnet eb deploy-environment
 
   run-migrations:
