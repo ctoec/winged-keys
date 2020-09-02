@@ -162,8 +162,7 @@ namespace WingedKeys
 
 			var forwardOptions = new ForwardedHeadersOptions
 			{
-				ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto,
-				RequireHeaderSymmetry = false
+				ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
 			};
 
 			forwardOptions.KnownNetworks.Clear();
