@@ -173,6 +173,17 @@ namespace WingedKeys
 			{
 				endpoints.MapDefaultControllerRoute();
 			});
+			var forwardOptions = new ForwardedHeadersOptions
+			{
+					ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto,
+					RequireHeaderSymmetry = false
+			};
+
+			forwardOptions.KnownNetworks.Clear();
+			forwardOptions.KnownProxies.Clear();
+
+			// ref: https://github.com/aspnet/Docs/issues/2384
+			app.UseForwardedHeaders(forwardOptions);
 		}
 	}
 }
