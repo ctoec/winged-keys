@@ -8,6 +8,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <BuiltProjectOutputGroupOutput Include="$(ProjectRuntimeConfigFilePath)">
+      <FinalOutputPath>$(ProjectRuntimeConfigFilePath)</FinalOutputPath>
+    </BuiltProjectOutputGroupOutput>
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="AWS.Logger.AspNetCore" Version="2.1.1" />
     <PackageReference Include="IdentityServer4" Version="3.0.2" />
     <PackageReference Include="IdentityServer4.AspNetIdentity" Version="3.0.1" />
