@@ -9,13 +9,13 @@
   </PropertyGroup>
 
   <ItemGroup>
-		<Content Update=".ebextensions\**" CopyToPublishDirectory="Always" />
-		<None Update=".ebextensions\**" CopyToOutputDirectory="Always" />
-		<None Include=".ebextensions\**" />
+		<Content Update=".platform\**" CopyToPublishDirectory="Always" />
+		<None Update=".platform\**" CopyToOutputDirectory="Always" />
+		<None Include=".platform\**" />
 
-    <Content Update=".ebextensions/**" CopyToPublishDirectory="Always" />
-		<None Update=".ebextensions/**" CopyToOutputDirectory="Always" />
-		<None Include=".ebextensions/**" />
+    <Content Update=".platform/**" CopyToPublishDirectory="Always" />
+		<None Update=".platform/**" CopyToOutputDirectory="Always" />
+		<None Include=".platform/**" />
 	</ItemGroup>
 
   <ItemGroup>
