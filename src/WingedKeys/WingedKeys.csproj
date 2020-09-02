@@ -14,6 +14,8 @@
     <Content Update=".ebextensions\**\*" CopyToPublishDirectory="Always" />
     <None Update=".ebextensions\**\*" CopyToOutputDirectory="Always" />
     <None Update="*.pfx" CopyToOutputDirectory="Always" />
+    <Content Update=".ebextensions\https-instance.config" CopyToPublishDirectory="Always" />
+    <None Update=".ebextensions\https-instance.config" CopyToOutputDirectory="Always" />
 
     <BuiltProjectOutputGroupOutput Include="$(ProjectRuntimeConfigFilePath)">
       <FinalOutputPath>$(ProjectRuntimeConfigFilePath)</FinalOutputPath>
