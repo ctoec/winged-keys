@@ -8,6 +8,7 @@
     <GenerateRuntimeConfigurationFiles>true</GenerateRuntimeConfigurationFiles>
   </PropertyGroup>
 
+  <!-- Include all the NGINX config for Elastic Beanstalk in the publish -->
   <ItemGroup>
 		<Content Update=".platform\**" CopyToPublishDirectory="Always" />
 		<None Update=".platform\**" CopyToOutputDirectory="Always" />
