@@ -11,8 +11,8 @@
   <ItemGroup>
     <!--  For insertion of security certificate during non-local deploys  -->
     <Content Update="*.pfx" CopyToPublishDirectory="Always" />
-    <Content Update=".ebextensions/**/*" CopyToPublishDirectory="Always" />
-    <None Update=".ebextensions/**/*" CopyToOutputDirectory="Always" />
+    <Content Update=".ebextensions\**\*" CopyToPublishDirectory="Always" />
+    <None Update=".ebextensions\**\*" CopyToOutputDirectory="Always" />
     <None Update="*.pfx" CopyToOutputDirectory="Always" />
 
     <BuiltProjectOutputGroupOutput Include="$(ProjectRuntimeConfigFilePath)">
