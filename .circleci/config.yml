@@ -44,6 +44,8 @@ jobs:
             cd src/WingedKeys
             aws secretsmanager get-secret-value --secret-id /ece/<< parameters.env >>/wingedkeys > secrets.json
             jq '.SecretString | fromjson' secrets.json > tmp.json && mv tmp.json secrets.json
+            jq '.ConnectionStrings={ WINGEDKEYS: ."ConnectionStrings.WINGEDKEYS" }' secrets.json > tmp.json && mv tmp.json secrets.json
+            jq 'del(.["ConnectionStrings.WINGEDKEYS"])' secrets.json > tmp.json && mv tmp.json secrets.json
       - run:
           name: 'Update Appsettings with environment specific variables'
           command: |
@@ -66,6 +68,7 @@ jobs:
           command: |
             cd src/WingedKeys
             jq -s '.[0] + .[1]' secrets.json appsettings.json > final_tmp.json && mv final_tmp.json appsettings.json
+            cat appsettings.json
       - run:
           name: 'Update Elastic Beanstalk Deploy Defaults'
           command: |
