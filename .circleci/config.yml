@@ -2,6 +2,7 @@ version: 2.1
 
 orbs:
   aws-s3: circleci/aws-s3@1.0.16
+  aws-cli: circleci/aws-cli@1.3.0
 
 jobs: 
   deploy:
@@ -36,23 +37,35 @@ jobs:
       - run:
           name: Install JQ 
           command: sudo apt-get install jq
+      - aws-cli/setup
+      - run:
+          name: Download AWS Secrets
+          command: |
+            cd src/WingedKeys
+            aws secretsmanager get-secret-value --secret-id /ece/<< parameters.env >>/wingedkeys > secrets.json
+            jq '.SecretString | fromjson' secrets.json > tmp.json && mv tmp.json secrets.json
       - run:
           name: 'Update Appsettings with environment specific variables'
-          # TODO: REMOVE PASSWORDS FROM THIS
           command: |
             cd src/WingedKeys
             jq '.AccessTokenLifetime="1800"' appsettings.json > temp.json && mv temp.json appsettings.json
             jq '.BaseUri="https://<< parameters.env >>.ece-wingedkeys.ctoecskylight.com"' appsettings.json > temp.json && mv temp.json appsettings.json
             jq '.CertificateFileName="<< parameters.env >>-wingedkeys.pfx"' appsettings.json > temp.json && mv temp.json appsettings.json
-            jq '.CertificatePassword="f7u7vC3vxEY9bKBWoMSBMI5trFD1Ffo3kQ=="' appsettings.json > temp.json && mv temp.json appsettings.json
             jq '.ClientUris="https://<< parameters.env >>.ece-hedwig.ctoecskylight.com,https://localhost:5001,https://<< parameters.env >>.ece-fawkes.ctoecskylight.com"' appsettings.json > temp.json && mv temp.json appsettings.json
-            jq '.ConnectionStrings.WINGEDKEYS="Server=<< parameters.env >>.ece-reporter-db.ctoecskylight.com;Database=wingedkeys;User Id=admin;Password=Z6EUX_123GwEq_HMVZN_;"' appsettings.json > temp.json && mv temp.json appsettings.json
             jq '.EnvironmentName="<< parameters.env >>"' appsettings.json > temp.json && mv temp.json appsettings.json
             jq '.Logging.LogGroup="/aws/elasticbeanstalk/ece-wingedkeys-<< parameters.env >>-env/app-log"' appsettings.json > temp.json && mv temp.json appsettings.json
             jq '.Logging.LogLevel.Default="Information"' appsettings.json > temp.json && mv temp.json appsettings.json
             jq '.Logging.LogLevel.Microsoft="Warning"' appsettings.json > temp.json && mv temp.json appsettings.json
             jq '.Logging.LogLevel.System="Warning"' appsettings.json > temp.json && mv temp.json appsettings.json
             jq '.Logging.Region="us-east-2"' appsettings.json > temp.json && mv temp.json appsettings.json
+
+            jq 'del(.ConnectionStrings)' appsettings.json > temp.json && mv temp.json appsettings.json
+            jq 'del(.CertificatePassword)' appsettings.json > temp.json && mv temp.json appsettings.json
+      - run:
+          name: Merge Appsettings Config with AWS Secrets
+          command: |
+            cd src/WingedKeys
+            jq -s '.[0] + .[1]' secrets.json appsettings.json > final_tmp.json && mv final_tmp.json appsettings.json
       - run:
           name: 'Update Elastic Beanstalk Deploy Defaults'
           command: |
@@ -88,9 +101,6 @@ jobs:
           name: "Deploy the application"
           command: |
             cd src/WingedKeys
-            ls -la
-            cat aws-beanstalk-tools-defaults.json
-            cat appsettings.json
             dotnet eb deploy-environment
 
 workflows:
