@@ -2,6 +2,7 @@ using System;
 using System.Linq;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Configuration;
 using IdentityServer4.EntityFramework.DbContexts;
 using IdentityServer4.EntityFramework.Mappers;
 using IdentityModel;
@@ -18,7 +19,9 @@ namespace WingedKeys.Data
 			ConfigurationDbContext configurationDbContext,
 			WingedKeysContext wingedKeysContext,
 			UserManager<ApplicationUser> userMgr,
-			Config config)
+			Config config,
+			IConfiguration configuration
+			)
 		{
 			persistedGrantDbContext.Database.EnsureCreated();
 			configurationDbContext.Database.EnsureCreated();
@@ -33,7 +36,7 @@ namespace WingedKeys.Data
 			var testAdminUser = userMgr.FindByIdAsync(DatabaseInitializer.TEST_USER_ID).Result;
 			if (testAdminUser == null)
 			{
-				AddTestApplicationAdminUser(userMgr);
+				AddTestApplicationAdminUser(userMgr, configuration.GetValue<string>("AdminPassword"));
 			}
 		}
 
@@ -71,7 +74,8 @@ namespace WingedKeys.Data
 		}
 
 		private static void AddTestApplicationAdminUser(
-			UserManager<ApplicationUser> userMgr
+			UserManager<ApplicationUser> userMgr,
+            string password
 		)
 		{
 			var voldemort = new ApplicationUser
@@ -81,7 +85,7 @@ namespace WingedKeys.Data
 				Email = "voldemort@hogwarts.uk.co",
 				EmailConfirmed = true
 			};
-			var result = userMgr.CreateAsync(voldemort, "thechosenone").Result;
+			var result = userMgr.CreateAsync(voldemort, password).Result;
 			if (!result.Succeeded)
 			{
 					throw new Exception(result.Errors.First().Description);

@@ -41,7 +41,7 @@ namespace WingedKeys
 						var userMgr = services.GetRequiredService<UserManager<ApplicationUser>>();
 						var configuration = services.GetRequiredService<IConfiguration>();
 						var config = new Config(configuration);
-						DatabaseInitializer.Initialize(persistedGrantDbContext, configurationDbContext, wingedKeysContext, userMgr, config);
+						DatabaseInitializer.Initialize(persistedGrantDbContext, configurationDbContext, wingedKeysContext, userMgr, config, configuration);
 						logger.LogInformation("Database initialization complete");
 					}
 					catch (Exception ex)
