@@ -44,6 +44,7 @@ jobs:
             cd src/WingedKeys
             aws secretsmanager get-secret-value --secret-id /ece/<< parameters.env >>/wingedkeys > secrets.json
             jq '.SecretString | fromjson' secrets.json > tmp.json && mv tmp.json secrets.json
+            cat secrets.json
             jq '.ConnectionStrings={ WINGEDKEYS: ."ConnectionStrings.WINGEDKEYS" }' secrets.json > tmp.json && mv tmp.json secrets.json
             jq 'del(.["ConnectionStrings.WINGEDKEYS"])' secrets.json > tmp.json && mv tmp.json secrets.json
       - run:
