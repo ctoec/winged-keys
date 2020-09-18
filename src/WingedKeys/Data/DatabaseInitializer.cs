@@ -13,7 +13,7 @@ namespace WingedKeys.Data
 	{
 		private static readonly string TEST_USER_ID = "2c0ec653-8829-4aa1-82ba-37c8832bbb88";
 
-		public static async void Initialize(
+		public static void Initialize(
 			PersistedGrantDbContext persistedGrantDbContext,
 			ConfigurationDbContext configurationDbContext,
 			WingedKeysContext wingedKeysContext,
@@ -30,7 +30,8 @@ namespace WingedKeys.Data
 			AddIdentityResources(config, configurationDbContext);
 			AddApiResources(config, configurationDbContext);
 
-			if ((await userMgr.FindByIdAsync(DatabaseInitializer.TEST_USER_ID)) == null)
+			var testAdminUser = userMgr.FindByIdAsync(DatabaseInitializer.TEST_USER_ID).Result;
+			if (testAdminUser == null)
 			{
 				AddTestApplicationAdminUser(userMgr);
 			}
