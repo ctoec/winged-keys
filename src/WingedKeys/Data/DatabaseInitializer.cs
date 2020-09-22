@@ -2,8 +2,7 @@ using System;
 using System.Linq;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Configuration;
 using IdentityServer4.EntityFramework.DbContexts;
 using IdentityServer4.EntityFramework.Mappers;
 using IdentityModel;
@@ -13,26 +12,32 @@ namespace WingedKeys.Data
 {
 	public static class DatabaseInitializer
 	{
+		private static readonly string TEST_USER_ID = "2c0ec653-8829-4aa1-82ba-37c8832bbb88";
+
 		public static void Initialize(
 			PersistedGrantDbContext persistedGrantDbContext,
 			ConfigurationDbContext configurationDbContext,
 			WingedKeysContext wingedKeysContext,
 			UserManager<ApplicationUser> userMgr,
-			Config config)
+			Config config,
+			IConfiguration configuration
+			)
 		{
 			persistedGrantDbContext.Database.EnsureCreated();
 			configurationDbContext.Database.EnsureCreated();
 			wingedKeysContext.Database.EnsureCreated();
 
-			DeleteAllData(
-				configurationDbContext,
-				wingedKeysContext,
-				userMgr);
+			DeleteAllData(configurationDbContext);
 
 			AddClients(config, configurationDbContext);
 			AddIdentityResources(config, configurationDbContext);
 			AddApiResources(config, configurationDbContext);
-			AddTestApplicationUsers(userMgr);
+
+			var testAdminUser = userMgr.FindByIdAsync(DatabaseInitializer.TEST_USER_ID).Result;
+			if (testAdminUser == null)
+			{
+				AddTestApplicationAdminUser(userMgr, configuration.GetValue<string>("AdminPassword"));
+			}
 		}
 
 		private static void AddClients(
@@ -68,18 +73,19 @@ namespace WingedKeys.Data
 			configurationDbContext.SaveChanges();
 		}
 
-		private static void AddTestApplicationUsers(
-			UserManager<ApplicationUser> userMgr
+		private static void AddTestApplicationAdminUser(
+			UserManager<ApplicationUser> userMgr,
+            string password
 		)
 		{
 			var voldemort = new ApplicationUser
 			{
-				Id = "2c0ec653-8829-4aa1-82ba-37c8832bbb88",
+				Id = DatabaseInitializer.TEST_USER_ID,
 				UserName = "voldemort",
 				Email = "voldemort@hogwarts.uk.co",
 				EmailConfirmed = true
 			};
-			var result = userMgr.CreateAsync(voldemort, "thechosenone").Result;
+			var result = userMgr.CreateAsync(voldemort, password).Result;
 			if (!result.Succeeded)
 			{
 					throw new Exception(result.Errors.First().Description);
@@ -102,9 +108,7 @@ namespace WingedKeys.Data
 		}
 
 		private static void DeleteAllData(
-			ConfigurationDbContext configurationDbContext,
-			WingedKeysContext wingedKeysContext,
-			UserManager<ApplicationUser> userMgr)
+			ConfigurationDbContext configurationDbContext)
 		{
 			// Delete tables that are modified in Config.cs
 			configurationDbContext.Clients.RemoveRange(
@@ -113,15 +117,6 @@ namespace WingedKeys.Data
 				configurationDbContext.IdentityResources.ToList());
 			configurationDbContext.ApiResources.RemoveRange(
 				configurationDbContext.ApiResources.ToList());
-
-			// Delete Users and AspNetUserClaims
-			var applicationUsers = wingedKeysContext.ApplicationUsers.ToList();
-			foreach (var user in applicationUsers)
-			{
-				var claims = userMgr.GetClaimsAsync(user).GetAwaiter().GetResult();
-				userMgr.RemoveClaimsAsync(user, claims).GetAwaiter().GetResult();
-			}
-			wingedKeysContext.ApplicationUsers.RemoveRange(applicationUsers);
 		}
 	}
 }

@@ -29,14 +29,13 @@ namespace IdentityServer4.Quickstart.UI
 
         public IActionResult Index()
         {
-            if (_environment.IsDevelopment())
+            if (!_environment.IsProduction())
             {
-                // only show in development
                 return View();
             }
 
             _logger.LogInformation("Homepage is disabled in production. Returning 404.");
-            return Ok();
+            return NotFound();
         }
 
         /// <summary>
