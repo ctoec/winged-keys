@@ -75,7 +75,7 @@ jobs:
             jq '.application="ece-wingedkeys-<< parameters.env >>-app"' aws-beanstalk-tools-defaults.json > temp.json && mv temp.json aws-beanstalk-tools-defaults.json
             jq '.environment="ece-wingedkeys-<< parameters.env >>-env"' aws-beanstalk-tools-defaults.json > temp.json && mv temp.json aws-beanstalk-tools-defaults.json
             jq '."instance-profile"="ece-wingedkeys-<< parameters.env >>-eb-ec2"' aws-beanstalk-tools-defaults.json > temp.json && mv temp.json aws-beanstalk-tools-defaults.json
-            cat src/WingedKeys/appsettings.json
+            cat appsettings.json
       - aws-s3/copy:
           from: 's3://ece-reporter-<< parameters.env >>-store/secrets/wingedkeys/<< parameters.env >>-wingedkeys.pfx'
           to: src/WingedKeys/
