@@ -61,7 +61,7 @@ jobs:
             jq '.Logging.LogLevel.System="Warning"' appsettings.json > temp.json && mv temp.json appsettings.json
             jq '.Logging.Region="us-east-2"' appsettings.json > temp.json && mv temp.json appsettings.json
 
-            # Remove from appsettings.json initially, as they will be replaced with the corresponding secrets pulled from AWs
+            # Remove from appsettings.json, as they will be replaced with the corresponding secrets pulled from AWs
             jq 'del(.AdminPassword)' appsettings.json > temp.json && mv temp.json appsettings.json
             jq 'del(.ConnectionStrings)' appsettings.json > temp.json && mv temp.json appsettings.json
             jq 'del(.CertificatePassword)' appsettings.json > temp.json && mv temp.json appsettings.json
