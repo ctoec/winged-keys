@@ -115,14 +115,6 @@ workflows:
           filters:
             branches:
               only: master
-  deploy-to-prod:
-    jobs:
-      - hold:
-          type: approval
-      - deploy:
-          env: prod
-          requires:
-            - hold
   deploy-to-staging:
     jobs:
       - hold:
@@ -145,5 +137,13 @@ workflows:
           type: approval
       - deploy:
           env: qa
+          requires:
+            - hold
+  deploy-to-prod:
+    jobs:
+      - hold:
+          type: approval
+      - deploy:
+          env: prod
           requires:
             - hold
