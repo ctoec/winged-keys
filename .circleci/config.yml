@@ -56,7 +56,7 @@ jobs:
             cd src/WingedKeys
             jq '.AccessTokenLifetime="1800"' appsettings.json > temp.json && mv temp.json appsettings.json
             jq '.BaseUri="https://<< parameters.stage >>.ece-wingedkeys.ctoecskylight.com"' appsettings.json > temp.json && mv temp.json appsettings.json
-            jq '.CertificateFileName="<< parameters.stage >>-wingedkeys.pfx"' appsettings.json > temp.json && mv temp.json appsettings.json
+            jq '.CertificateFileName="server.pfx"' appsettings.json > temp.json && mv temp.json appsettings.json
             jq '.ClientUris="https://<< parameters.stage >>.ece-hedwig.ctoecskylight.com,https://localhost:5001,https://<< parameters.stage >>.ece-fawkes.ctoecskylight.com"' appsettings.json > temp.json && mv temp.json appsettings.json
             jq '.EnvironmentName="<< parameters.dotnet-env >>"' appsettings.json > temp.json && mv temp.json appsettings.json
             jq '.Logging.LogGroup="/aws/elasticbeanstalk/ece-wingedkeys-<< parameters.stage >>-env/app-log"' appsettings.json > temp.json && mv temp.json appsettings.json
@@ -65,7 +65,7 @@ jobs:
             jq '.Logging.LogLevel.System="Warning"' appsettings.json > temp.json && mv temp.json appsettings.json
             jq '.Logging.Region="us-east-2"' appsettings.json > temp.json && mv temp.json appsettings.json
 
-            # Remove from appsettings.json, as they will be replaced with the corresponding secrets pulled from AWs
+            # Remove from appsettings.json, as they will be replaced with the corresponding secrets pulled from AWS
             jq 'del(.AdminPassword)' appsettings.json > temp.json && mv temp.json appsettings.json
             jq 'del(.ConnectionStrings)' appsettings.json > temp.json && mv temp.json appsettings.json
             jq 'del(.CertificatePassword)' appsettings.json > temp.json && mv temp.json appsettings.json
@@ -82,7 +82,7 @@ jobs:
             jq '.environment="ece-wingedkeys-<< parameters.stage >>-env"' aws-beanstalk-tools-defaults.json > temp.json && mv temp.json aws-beanstalk-tools-defaults.json
             jq '."instance-profile"="ece-wingedkeys-<< parameters.stage >>-eb-ec2"' aws-beanstalk-tools-defaults.json > temp.json && mv temp.json aws-beanstalk-tools-defaults.json
       - aws-s3/copy:
-          from: 's3://ece-wingedkeys-<< parameters.stage >>-store/secrets/wingedkeys/<< parameters.stage >>-wingedkeys.pfx'
+          from: 's3://ece-wingedkeys-<< parameters.stage >>-store/secrets/server.pfx'
           to: src/WingedKeys/
       - add_ssh_keys
       - run:
