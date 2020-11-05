@@ -63,7 +63,7 @@ jobs:
             jq '.AccessTokenLifetime="1800"' appsettings.json > temp.json && mv temp.json appsettings.json
             jq '.BaseUri="https://<< parameters.stage >>.ece-wingedkeys.ctoecskylight.com"' appsettings.json > temp.json && mv temp.json appsettings.json
             jq '.CertificateFileName="server.pfx"' appsettings.json > temp.json && mv temp.json appsettings.json
-            jq --argfile password password.txt '.CertificatePassword=$password' appsettings.json > temp.json && mv temp.json appsettings.json
+            jq --rawfile password password.txt '.CertificatePassword=($password | rtrimstr("\n"))' appsettings.json > temp.json && mv temp.json appsettings.json
             jq '.ClientUris="https://<< parameters.stage >>.ece-hedwig.ctoecskylight.com,https://localhost:5001,https://<< parameters.stage >>.ece-fawkes.ctoecskylight.com"' appsettings.json > temp.json && mv temp.json appsettings.json
             jq '.EnvironmentName="<< parameters.dotnet-env >>"' appsettings.json > temp.json && mv temp.json appsettings.json
             jq '.Logging.LogGroup="/aws/elasticbeanstalk/ece-wingedkeys-<< parameters.stage >>-env/app-log"' appsettings.json > temp.json && mv temp.json appsettings.json
