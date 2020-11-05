@@ -50,6 +50,12 @@ jobs:
             jq '.SecretString | fromjson' secrets.json > tmp.json && mv tmp.json secrets.json
             jq '.ConnectionStrings={ WINGEDKEYS: ."ConnectionStrings.WINGEDKEYS" }' secrets.json > tmp.json && mv tmp.json secrets.json
             jq 'del(.["ConnectionStrings.WINGEDKEYS"])' secrets.json > tmp.json && mv tmp.json secrets.json
+      - aws-s3/copy:
+          from: 's3://ece-wingedkeys-<< parameters.stage >>-store/secrets/server.pfx'
+          to: src/WingedKeys/
+      - aws-s3/copy:
+          from: 's3://ece-wingedkeys-<< parameters.stage >>-store/secrets/password.txt'
+          to: src/WingedKeys/
       - run:
           name: 'Update Appsettings with environment specific variables'
           command: |
@@ -69,6 +75,9 @@ jobs:
             jq 'del(.AdminPassword)' appsettings.json > temp.json && mv temp.json appsettings.json
             jq 'del(.ConnectionStrings)' appsettings.json > temp.json && mv temp.json appsettings.json
             jq 'del(.CertificatePassword)' appsettings.json > temp.json && mv temp.json appsettings.json
+
+            jq --argfile password password.txt '.CertificatePassword=$password' appsettings.json > temp.json && mv temp.json appsettings.json
+            cat appsettings.json
       - run:
           name: Merge Appsettings Config with AWS Secrets
           command: |
@@ -81,9 +90,6 @@ jobs:
             jq '.application="ece-wingedkeys-<< parameters.stage >>-app"' aws-beanstalk-tools-defaults.json > temp.json && mv temp.json aws-beanstalk-tools-defaults.json
             jq '.environment="ece-wingedkeys-<< parameters.stage >>-env"' aws-beanstalk-tools-defaults.json > temp.json && mv temp.json aws-beanstalk-tools-defaults.json
             jq '."instance-profile"="ece-wingedkeys-<< parameters.stage >>-eb-ec2"' aws-beanstalk-tools-defaults.json > temp.json && mv temp.json aws-beanstalk-tools-defaults.json
-      - aws-s3/copy:
-          from: 's3://ece-wingedkeys-<< parameters.stage >>-store/secrets/server.pfx'
-          to: src/WingedKeys/
       - add_ssh_keys
       - run:
           name: Generate Migrations
