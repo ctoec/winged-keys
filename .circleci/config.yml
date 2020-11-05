@@ -9,9 +9,13 @@ jobs:
     machine:
       image: ubuntu-1604:202007-01 
     parameters:
-      env:
-        description: "The environment to deploy Winged Keys to (qa, devsecure, staging)"
+      stage:
+        description: "The specific stage to deploy Winged Keys to (qa, devsecure, staging, prod)"
         type: string
+      dotnet-env:
+        description: "The runtime environment to be used to configure the .NET application (Development, Staging, Production)"
+        type: string
+        default: "Development"
     steps:
       - checkout
       - run:
@@ -42,7 +46,7 @@ jobs:
           name: Download and Parse AWS Secrets
           command: |
             cd src/WingedKeys
-            aws secretsmanager get-secret-value --secret-id /ece/<< parameters.env >>/wingedkeys/admin > secrets.json
+            aws secretsmanager get-secret-value --secret-id /ece/<< parameters.stage >>/wingedkeys/admin > secrets.json
             jq '.SecretString | fromjson' secrets.json > tmp.json && mv tmp.json secrets.json
             jq '.ConnectionStrings={ WINGEDKEYS: ."ConnectionStrings.WINGEDKEYS" }' secrets.json > tmp.json && mv tmp.json secrets.json
             jq 'del(.["ConnectionStrings.WINGEDKEYS"])' secrets.json > tmp.json && mv tmp.json secrets.json
@@ -51,11 +55,11 @@ jobs:
           command: |
             cd src/WingedKeys
             jq '.AccessTokenLifetime="1800"' appsettings.json > temp.json && mv temp.json appsettings.json
-            jq '.BaseUri="https://<< parameters.env >>.ece-wingedkeys.ctoecskylight.com"' appsettings.json > temp.json && mv temp.json appsettings.json
-            jq '.CertificateFileName="<< parameters.env >>-wingedkeys.pfx"' appsettings.json > temp.json && mv temp.json appsettings.json
-            jq '.ClientUris="https://<< parameters.env >>.ece-hedwig.ctoecskylight.com,https://localhost:5001,https://<< parameters.env >>.ece-fawkes.ctoecskylight.com"' appsettings.json > temp.json && mv temp.json appsettings.json
-            jq '.EnvironmentName="<< parameters.env >>"' appsettings.json > temp.json && mv temp.json appsettings.json
-            jq '.Logging.LogGroup="/aws/elasticbeanstalk/ece-wingedkeys-<< parameters.env >>-env/app-log"' appsettings.json > temp.json && mv temp.json appsettings.json
+            jq '.BaseUri="https://<< parameters.stage >>.ece-wingedkeys.ctoecskylight.com"' appsettings.json > temp.json && mv temp.json appsettings.json
+            jq '.CertificateFileName="<< parameters.stage >>-wingedkeys.pfx"' appsettings.json > temp.json && mv temp.json appsettings.json
+            jq '.ClientUris="https://<< parameters.stage >>.ece-hedwig.ctoecskylight.com,https://localhost:5001,https://<< parameters.stage >>.ece-fawkes.ctoecskylight.com"' appsettings.json > temp.json && mv temp.json appsettings.json
+            jq '.EnvironmentName="<< parameters.dotnet-env >>"' appsettings.json > temp.json && mv temp.json appsettings.json
+            jq '.Logging.LogGroup="/aws/elasticbeanstalk/ece-wingedkeys-<< parameters.stage >>-env/app-log"' appsettings.json > temp.json && mv temp.json appsettings.json
             jq '.Logging.LogLevel.Default="Information"' appsettings.json > temp.json && mv temp.json appsettings.json
             jq '.Logging.LogLevel.Microsoft="Warning"' appsettings.json > temp.json && mv temp.json appsettings.json
             jq '.Logging.LogLevel.System="Warning"' appsettings.json > temp.json && mv temp.json appsettings.json
@@ -74,11 +78,11 @@ jobs:
           name: 'Update Elastic Beanstalk Deploy Defaults'
           command: |
             cd src/WingedKeys
-            jq '.application="ece-wingedkeys-<< parameters.env >>-app"' aws-beanstalk-tools-defaults.json > temp.json && mv temp.json aws-beanstalk-tools-defaults.json
-            jq '.environment="ece-wingedkeys-<< parameters.env >>-env"' aws-beanstalk-tools-defaults.json > temp.json && mv temp.json aws-beanstalk-tools-defaults.json
-            jq '."instance-profile"="ece-wingedkeys-<< parameters.env >>-eb-ec2"' aws-beanstalk-tools-defaults.json > temp.json && mv temp.json aws-beanstalk-tools-defaults.json
+            jq '.application="ece-wingedkeys-<< parameters.stage >>-app"' aws-beanstalk-tools-defaults.json > temp.json && mv temp.json aws-beanstalk-tools-defaults.json
+            jq '.environment="ece-wingedkeys-<< parameters.stage >>-env"' aws-beanstalk-tools-defaults.json > temp.json && mv temp.json aws-beanstalk-tools-defaults.json
+            jq '."instance-profile"="ece-wingedkeys-<< parameters.stage >>-eb-ec2"' aws-beanstalk-tools-defaults.json > temp.json && mv temp.json aws-beanstalk-tools-defaults.json
       - aws-s3/copy:
-          from: 's3://ece-wingedkeys-<< parameters.env >>-store/secrets/wingedkeys/<< parameters.env >>-wingedkeys.pfx'
+          from: 's3://ece-wingedkeys-<< parameters.stage >>-store/secrets/wingedkeys/<< parameters.stage >>-wingedkeys.pfx'
           to: src/WingedKeys/
       - add_ssh_keys
       - run:
@@ -90,17 +94,17 @@ jobs:
       - run:
           name: 'Put SQL Migrations on Jump Server'
           command: |
-            scp winged-keys-configuration-db.sql ubuntu@<< parameters.env >>.ece-jumpserver.ctoecskylight.com:/home/ubuntu/
-            scp winged-keys-persisted-db.sql ubuntu@<< parameters.env >>.ece-jumpserver.ctoecskylight.com:/home/ubuntu/
-            scp winged-keys-wingedkeys-db.sql ubuntu@<< parameters.env >>.ece-jumpserver.ctoecskylight.com:/home/ubuntu/
+            scp winged-keys-configuration-db.sql ubuntu@<< parameters.stage >>.ece-jumpserver.ctoecskylight.com:/home/ubuntu/
+            scp winged-keys-persisted-db.sql ubuntu@<< parameters.stage >>.ece-jumpserver.ctoecskylight.com:/home/ubuntu/
+            scp winged-keys-wingedkeys-db.sql ubuntu@<< parameters.stage >>.ece-jumpserver.ctoecskylight.com:/home/ubuntu/
       - run:
           name: 'Run SQL Migrations'
           command: |
-            ssh ubuntu@<< parameters.env >>.ece-jumpserver.ctoecskylight.com "cd /home/ubuntu/ && /home/ubuntu/scripts/db-migrate-wingedkeys.sh winged-keys-configuration-db.sql && /home/ubuntu/scripts/db-migrate-wingedkeys.sh winged-keys-persisted-db.sql && /home/ubuntu/scripts/db-migrate-wingedkeys.sh winged-keys-wingedkeys-db.sql"
+            ssh ubuntu@<< parameters.stage >>.ece-jumpserver.ctoecskylight.com "cd /home/ubuntu/ && /home/ubuntu/scripts/db-migrate-wingedkeys.sh winged-keys-configuration-db.sql && /home/ubuntu/scripts/db-migrate-wingedkeys.sh winged-keys-persisted-db.sql && /home/ubuntu/scripts/db-migrate-wingedkeys.sh winged-keys-wingedkeys-db.sql"
       - run:
           name: 'Remove Migrations from Jump Server'
           command: |
-            ssh ubuntu@<< parameters.env >>.ece-jumpserver.ctoecskylight.com "cd /home/ubuntu/ && rm winged-keys-configuration-db.sql winged-keys-persisted-db.sql winged-keys-wingedkeys-db.sql"
+            ssh ubuntu@<< parameters.stage >>.ece-jumpserver.ctoecskylight.com "cd /home/ubuntu/ && rm winged-keys-configuration-db.sql winged-keys-persisted-db.sql winged-keys-wingedkeys-db.sql"
       - run:
           name: "Deploy the application"
           command: |
@@ -111,7 +115,8 @@ workflows:
   auto-deploy:
     jobs:
       - deploy:
-          env: staging
+          stage: staging
+          dotnet-env: Staging
           filters:
             branches:
               only: master
@@ -120,7 +125,8 @@ workflows:
       - hold:
           type: approval
       - deploy:
-          env: staging
+          stage: staging
+          dotnet-env: Staging
           requires:
             - hold
   deploy-to-devsecure:
@@ -128,7 +134,7 @@ workflows:
       - hold:
           type: approval
       - deploy:
-          env: devsecure
+          stage: devsecure
           requires:
             - hold
   deploy-to-qa:
@@ -136,6 +142,15 @@ workflows:
       - hold:
           type: approval
       - deploy:
-          env: qa
+          stage: qa
+          requires:
+            - hold
+  deploy-to-prod:
+    jobs:
+      - hold:
+          type: approval
+      - deploy:
+          stage: prod
+          dotnet-env: Production
           requires:
             - hold
