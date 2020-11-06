@@ -50,13 +50,20 @@ jobs:
             jq '.SecretString | fromjson' secrets.json > tmp.json && mv tmp.json secrets.json
             jq '.ConnectionStrings={ WINGEDKEYS: ."ConnectionStrings.WINGEDKEYS" }' secrets.json > tmp.json && mv tmp.json secrets.json
             jq 'del(.["ConnectionStrings.WINGEDKEYS"])' secrets.json > tmp.json && mv tmp.json secrets.json
+      - aws-s3/copy:
+          from: 's3://ece-wingedkeys-<< parameters.stage >>-store/secrets/server.pfx'
+          to: src/WingedKeys/
+      - aws-s3/copy:
+          from: 's3://ece-wingedkeys-<< parameters.stage >>-store/secrets/password.txt'
+          to: src/WingedKeys/
       - run:
           name: 'Update Appsettings with environment specific variables'
           command: |
             cd src/WingedKeys
             jq '.AccessTokenLifetime="1800"' appsettings.json > temp.json && mv temp.json appsettings.json
             jq '.BaseUri="https://<< parameters.stage >>.ece-wingedkeys.ctoecskylight.com"' appsettings.json > temp.json && mv temp.json appsettings.json
-            jq '.CertificateFileName="<< parameters.stage >>-wingedkeys.pfx"' appsettings.json > temp.json && mv temp.json appsettings.json
+            jq '.CertificateFileName="server.pfx"' appsettings.json > temp.json && mv temp.json appsettings.json
+            jq --rawfile password password.txt '.CertificatePassword=($password | rtrimstr("\n"))' appsettings.json > temp.json && mv temp.json appsettings.json
             jq '.ClientUris="https://<< parameters.stage >>.ece-hedwig.ctoecskylight.com,https://localhost:5001,https://<< parameters.stage >>.ece-fawkes.ctoecskylight.com"' appsettings.json > temp.json && mv temp.json appsettings.json
             jq '.EnvironmentName="<< parameters.dotnet-env >>"' appsettings.json > temp.json && mv temp.json appsettings.json
             jq '.Logging.LogGroup="/aws/elasticbeanstalk/ece-wingedkeys-<< parameters.stage >>-env/app-log"' appsettings.json > temp.json && mv temp.json appsettings.json
@@ -65,10 +72,9 @@ jobs:
             jq '.Logging.LogLevel.System="Warning"' appsettings.json > temp.json && mv temp.json appsettings.json
             jq '.Logging.Region="us-east-2"' appsettings.json > temp.json && mv temp.json appsettings.json
 
-            # Remove from appsettings.json, as they will be replaced with the corresponding secrets pulled from AWs
+            # Remove from appsettings.json, as they will be replaced with the corresponding secrets pulled from AWS
             jq 'del(.AdminPassword)' appsettings.json > temp.json && mv temp.json appsettings.json
             jq 'del(.ConnectionStrings)' appsettings.json > temp.json && mv temp.json appsettings.json
-            jq 'del(.CertificatePassword)' appsettings.json > temp.json && mv temp.json appsettings.json
       - run:
           name: Merge Appsettings Config with AWS Secrets
           command: |
@@ -81,9 +87,6 @@ jobs:
             jq '.application="ece-wingedkeys-<< parameters.stage >>-app"' aws-beanstalk-tools-defaults.json > temp.json && mv temp.json aws-beanstalk-tools-defaults.json
             jq '.environment="ece-wingedkeys-<< parameters.stage >>-env"' aws-beanstalk-tools-defaults.json > temp.json && mv temp.json aws-beanstalk-tools-defaults.json
             jq '."instance-profile"="ece-wingedkeys-<< parameters.stage >>-eb-ec2"' aws-beanstalk-tools-defaults.json > temp.json && mv temp.json aws-beanstalk-tools-defaults.json
-      - aws-s3/copy:
-          from: 's3://ece-wingedkeys-<< parameters.stage >>-store/secrets/wingedkeys/<< parameters.stage >>-wingedkeys.pfx'
-          to: src/WingedKeys/
       - add_ssh_keys
       - run:
           name: Generate Migrations
