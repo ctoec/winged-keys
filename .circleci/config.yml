@@ -39,8 +39,11 @@ jobs:
             dotnet tool install --global Amazon.ElasticBeanstalk.Tools
             echo 'export PATH="$PATH:$HOME/.dotnet/tools/"' >> $BASH_ENV
       - run:
-          name: Install JQ 
-          command: sudo apt-get install jq
+          name: Install JQ 1.6 from GitHub # Because apparently the '--rawfile' param isn't in Linux v1.5
+          command: |
+            wget https://github.com/stedolan/jq/releases/download/jq-1.6/jq-linux64
+            chmod +x jq-linux64
+            sudo mv jq-linux64 $(which jq)
       - aws-cli/setup
       - run:
           name: Download and Parse AWS Secrets
