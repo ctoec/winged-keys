@@ -64,7 +64,8 @@ jobs:
           name: 'Update Appsettings with environment specific variables'
           command: |
             jq --version
-            
+            jq --help
+
             cd src/WingedKeys
             jq '.AccessTokenLifetime="1800"' appsettings.json > temp.json && mv temp.json appsettings.json
             jq '.BaseUri="https://<< parameters.stage >>.ece-wingedkeys.ctoecskylight.com"' appsettings.json > temp.json && mv temp.json appsettings.json
