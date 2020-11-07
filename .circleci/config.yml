@@ -40,7 +40,10 @@ jobs:
             echo 'export PATH="$PATH:$HOME/.dotnet/tools/"' >> $BASH_ENV
       - run:
           name: Install JQ 
-          command: sudo apt-get install jq
+          command: |
+            wget https://github.com/stedolan/jq/releases/download/jq-1.5/jq-linux64
+            chmod +x jq-linux64
+            sudo mv jq-linux64 $(which jq)
       - aws-cli/setup
       - run:
           name: Download and Parse AWS Secrets
