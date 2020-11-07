@@ -44,6 +44,7 @@ jobs:
             wget https://github.com/stedolan/jq/releases/download/jq-1.5/jq-linux64
             chmod +x jq-linux64
             sudo mv jq-linux64 $(which jq)
+            jq --version
       - aws-cli/setup
       - run:
           name: Download and Parse AWS Secrets
@@ -62,6 +63,8 @@ jobs:
       - run:
           name: 'Update Appsettings with environment specific variables'
           command: |
+            jq --version
+            
             cd src/WingedKeys
             jq '.AccessTokenLifetime="1800"' appsettings.json > temp.json && mv temp.json appsettings.json
             jq '.BaseUri="https://<< parameters.stage >>.ece-wingedkeys.ctoecskylight.com"' appsettings.json > temp.json && mv temp.json appsettings.json
