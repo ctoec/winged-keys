@@ -16,6 +16,10 @@ jobs:
         description: "The runtime environment to be used to configure the .NET application (Development, Staging, Production)"
         type: string
         default: "Development"
+      additional-clients:
+        description: "Any additional FQDNs for existing clients that will require programmatic access to Winged Keys.  Be sure to put a ',' at the end of this parameter when specified!"
+        type: string
+        default: ""
     steps:
       - checkout
       - run:
@@ -67,7 +71,7 @@ jobs:
             jq '.BaseUri="https://<< parameters.stage >>.ece-wingedkeys.ctoecskylight.com"' appsettings.json > temp.json && mv temp.json appsettings.json
             jq '.CertificateFileName="server.pfx"' appsettings.json > temp.json && mv temp.json appsettings.json
             jq --rawfile password password.txt '.CertificatePassword=($password | rtrimstr("\n"))' appsettings.json > temp.json && mv temp.json appsettings.json
-            jq '.ClientUris="https://<< parameters.stage >>.ece-hedwig.ctoecskylight.com,https://localhost:5001,https://<< parameters.stage >>.ece-fawkes.ctoecskylight.com"' appsettings.json > temp.json && mv temp.json appsettings.json
+            jq '.ClientUris="<< parameters.additional-clients >>https://<< parameters.stage >>.ece-hedwig.ctoecskylight.com,https://localhost:5001,https://<< parameters.stage >>.ece-fawkes.ctoecskylight.com"' appsettings.json > temp.json && mv temp.json appsettings.json
             jq '.EnvironmentName="<< parameters.dotnet-env >>"' appsettings.json > temp.json && mv temp.json appsettings.json
             jq '.Logging.LogGroup="/aws/elasticbeanstalk/ece-wingedkeys-<< parameters.stage >>-env/app-log"' appsettings.json > temp.json && mv temp.json appsettings.json
             jq '.Logging.LogLevel.Default="Information"' appsettings.json > temp.json && mv temp.json appsettings.json
@@ -158,5 +162,6 @@ workflows:
       - deploy:
           stage: prod
           dotnet-env: Production
+          additional-clients: "https://ece-reporter.ctoec.org,"
           requires:
             - hold
