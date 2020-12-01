@@ -207,6 +207,12 @@ namespace IdentityServer4.Quickstart.UI
             return View();
         }
 
+        [HttpGet]
+        public IActionResult ForgotPassword()
+        {
+            return View();
+        }
+
 
         /*****************************************/
         /* helper APIs for the AccountController */
