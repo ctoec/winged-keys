@@ -77,6 +77,7 @@ namespace IdentityServer4.Quickstart.UI
             // the user clicked the "cancel" button
             if (button != "login")
             {
+
                 if (context != null)
                 {
                     // if the user cancels, send a result back into IdentityServer as if they 
@@ -211,6 +212,28 @@ namespace IdentityServer4.Quickstart.UI
         public IActionResult ForgotPassword()
         {
             return View();
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ForgotPassword(ForgotPasswordViewModel model)
+        {
+            if (ModelState.IsValid)
+            {
+                var user = await _userManager.FindByEmailAsync(model.Email);
+                if (user == null || !(await _userManager.IsEmailConfirmedAsync(user)))
+                {
+                    //  Display an error?  Do we want to do that?  Or just say "if email exists, it was sent"?
+                }
+
+                string code = await _userManager.GeneratePasswordResetTokenAsync(user);
+                var callbackUrl = Url.Action("ResetPassword", "Account",
+            new { userId = user.Id, code = code }, protocol: Request.Scheme);
+
+                await _userManager.ema(user,
+               "Confirm your account", "Please confirm your account by clicking <a href=\""
+               + callbackUrl + "\">here</a>");
+            }
         }
 
 
