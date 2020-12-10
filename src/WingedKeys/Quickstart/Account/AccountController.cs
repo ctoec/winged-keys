@@ -245,6 +245,28 @@ namespace IdentityServer4.Quickstart.UI
             return View();
         }
 
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [Authorize]
+        public async Task<IActionResult> ResetPassword(ResetPasswordInputModel model)
+        {
+            if (ModelState.IsValid)
+            {
+                var user = await _userManager.FindByEmailAsync(model.Email);
+                var resetPassResult = await _userManager.ResetPasswordAsync(user, model.Token, model.Password);
+
+                if (!resetPassResult.Succeeded)
+                {
+                    foreach (var error in resetPassResult.Errors)
+                    {
+                        ModelState.TryAddModelError(error.Code, error.Description);
+                    }
+                }
+            }
+
+            return View();
+        }
+
 
         /*****************************************/
         /* helper APIs for the AccountController */
