@@ -226,8 +226,7 @@ namespace IdentityServer4.Quickstart.UI
                 if (user != null && await _userManager.IsEmailConfirmedAsync(user))
                 {
                     string code = await _userManager.GeneratePasswordResetTokenAsync(user);
-                    var callbackUrl = Url.Action("ResetPassword", "Account",
-                new { userId = user.Id, code = code }, protocol: Request.Scheme);
+                    var callbackUrl = Url.Action("ResetPassword", "Account", new { UserId = user.Id, Token = code }, protocol: Request.Scheme);
 
                     await new EmailService().SendEmailAsync(model.Email,
                         "Please confirm your account by clicking <a href=\"" + callbackUrl + "\">here</a>.");
