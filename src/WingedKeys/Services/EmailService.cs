@@ -11,22 +11,21 @@ namespace WingedKeys.Services
         {
         }
 
-        public Task SendEmailAsync()
+        public Task SendEmailAsync(string emailAddress, string htmlContent)
         {
-            return Execute();
+            return Execute(emailAddress, htmlContent);
         }
 
-        public Task Execute()
+        public Task Execute(string emailAddress, string htmlContent)
         {
             //  TODO: PULL THIS API KEY OUTTA HERE, AND THEN CHANGE IT
             var client = new SendGridClient("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");
-            var from = new EmailAddress("no-reply@ctoecskylight.com");
-            var subject = "JUST A TEST";
-            var to = new EmailAddress("jordan@skylight.digital");
-            var plainTextContent = "LOOK MORE WORDS";
+            var from = new EmailAddress("no-reply@ctoecskylight.com", "Connecticut Office of Early Childhood");
+            var subject = "Password Reset Request";
+            var to = new EmailAddress(emailAddress);
 
 
-            var msg = MailHelper.CreateSingleEmail(from, to, subject, plainTextContent, "");
+            var msg = MailHelper.CreateSingleEmail(from, to, subject, "", htmlContent);
 
             return client.SendEmailAsync(msg);
         }

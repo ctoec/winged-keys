@@ -220,7 +220,6 @@ namespace IdentityServer4.Quickstart.UI
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> ForgotPassword(ForgotPasswordInputModel model, string button)
         {
-            Trace.WriteLine("IN THE FORGOT PASSWORD SHIT");
             if (ModelState.IsValid)
             {
                 var user = await _userManager.FindByEmailAsync(model.Email);
@@ -231,10 +230,8 @@ namespace IdentityServer4.Quickstart.UI
                     var callbackUrl = Url.Action("ResetPassword", "Account",
                 new { userId = user.Id, code = code }, protocol: Request.Scheme);
 
-                    Trace.WriteLine("SENDING THE EMAIL");
-                    await new EmailService().SendEmailAsync();
-                   //"Confirm your account", "Please confirm your account by clicking <a href=\""
-                   //+ callbackUrl + "\">here</a>");
+                    await new EmailService().SendEmailAsync(model.Email,
+                        "Please confirm your account by clicking <a href=\"" + callbackUrl + "\">here</a>");
                 }
             }
 
