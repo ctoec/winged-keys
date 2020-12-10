@@ -241,15 +241,13 @@ namespace IdentityServer4.Quickstart.UI
 
         [HttpGet]
         [ValidateAntiForgeryToken]
-        [Authorize]
-        public IActionResult ResetPassword(string token, string email)
+        public IActionResult ResetPassword(string email, string token)
         {
             return View(new ResetPasswordInputModel { Token = token, Email = email });
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [Authorize]
         public async Task<IActionResult> ResetPassword(ResetPasswordInputModel model)
         {
             if (ModelState.IsValid)
