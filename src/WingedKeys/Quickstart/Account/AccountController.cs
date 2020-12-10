@@ -217,7 +217,7 @@ namespace IdentityServer4.Quickstart.UI
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> ForgotPassword(ForgotPasswordInputModel model, string button)
+        public async Task<IActionResult> ForgotPassword(ForgotPasswordInputModel model)
         {
             if (ModelState.IsValid)
             {
@@ -231,6 +231,9 @@ namespace IdentityServer4.Quickstart.UI
                     await new EmailService().SendEmailAsync(model.Email,
                         "Please confirm your account by clicking <a href=\"" + callbackUrl + "\">here</a>.");
                 }
+
+                //  Say an email was sent regardless (security through obscurity)
+                return View(new ForgotPasswordViewModel { EmailSent = true });
             }
 
             return View();
@@ -251,7 +254,7 @@ namespace IdentityServer4.Quickstart.UI
         {
             if (ModelState.IsValid)
             {
-                var user = await _userManager.FindByEmailAsync(model.Email);
+                var user = await _userManager.FindByIdAsync(model.UserId);
                 var resetPassResult = await _userManager.ResetPasswordAsync(user, model.Token, model.Password);
 
                 if (!resetPassResult.Succeeded)
