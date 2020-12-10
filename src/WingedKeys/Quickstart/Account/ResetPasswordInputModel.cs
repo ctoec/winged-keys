@@ -13,7 +13,7 @@ namespace IdentityServer4.Quickstart.UI
         [Compare(nameof(Password), ErrorMessage = "Passwords don't match.")]
         public string ConfirmPassword { get; set; }
 
-        public string UserId { get; set; }
+        public string Email { get; set; }
         public string Token { get; set; }
     }
 }

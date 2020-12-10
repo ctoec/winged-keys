@@ -225,8 +225,8 @@ namespace IdentityServer4.Quickstart.UI
 
                 if (user != null && await _userManager.IsEmailConfirmedAsync(user))
                 {
-                    string code = await _userManager.GeneratePasswordResetTokenAsync(user);
-                    var callbackUrl = Url.Action("ResetPassword", "Account", new { UserId = user.Id, Token = code }, protocol: Request.Scheme);
+                    string token = await _userManager.GeneratePasswordResetTokenAsync(user);
+                    var callbackUrl = Url.Action("ResetPassword", "Account", new { email = user.Email, token = token }, protocol: Request.Scheme);
 
                     await new EmailService().SendEmailAsync(model.Email,
                         "Please confirm your account by clicking <a href=\"" + callbackUrl + "\">here</a>.");
@@ -242,9 +242,9 @@ namespace IdentityServer4.Quickstart.UI
         [HttpGet]
         [ValidateAntiForgeryToken]
         [Authorize]
-        public IActionResult ResetPassword()
+        public IActionResult ResetPassword(string token, string email)
         {
-            return View();
+            return View(new ResetPasswordInputModel { Token = token, Email = email });
         }
 
         [HttpPost]
@@ -254,7 +254,7 @@ namespace IdentityServer4.Quickstart.UI
         {
             if (ModelState.IsValid)
             {
-                var user = await _userManager.FindByIdAsync(model.UserId);
+                var user = await _userManager.FindByEmailAsync(model.Email);
                 var resetPassResult = await _userManager.ResetPasswordAsync(user, model.Token, model.Password);
 
                 if (!resetPassResult.Succeeded)
