@@ -237,6 +237,14 @@ namespace IdentityServer4.Quickstart.UI
             return View();
         }
 
+        [HttpGet]
+        [ValidateAntiForgeryToken]
+        [Authorize]
+        public IActionResult ResetPassword()
+        {
+            return View();
+        }
+
 
         /*****************************************/
         /* helper APIs for the AccountController */
