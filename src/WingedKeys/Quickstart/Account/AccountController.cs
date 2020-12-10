@@ -212,7 +212,7 @@ namespace IdentityServer4.Quickstart.UI
         [HttpGet]
         public IActionResult ForgotPassword()
         {
-            return View();
+            return View(new ForgotPasswordViewModel{ });
         }
 
         [HttpPost]
