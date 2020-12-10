@@ -2,7 +2,7 @@
 
 namespace IdentityServer4.Quickstart.UI
 {
-    public class ForgotPasswordViewModel
+    public class ForgotPasswordInputModel
     {
         [Required]
         public string Email { get; set; }

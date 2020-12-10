@@ -13,9 +13,11 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using System;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using WingedKeys.Models;
+using WingedKeys.Services;
 
 namespace IdentityServer4.Quickstart.UI
 {
@@ -216,24 +218,27 @@ namespace IdentityServer4.Quickstart.UI
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> ForgotPassword(ForgotPasswordViewModel model)
+        public async Task<IActionResult> ForgotPassword(ForgotPasswordInputModel model, string button)
         {
+            Trace.WriteLine("IN THE FORGOT PASSWORD SHIT");
             if (ModelState.IsValid)
             {
                 var user = await _userManager.FindByEmailAsync(model.Email);
-                if (user == null || !(await _userManager.IsEmailConfirmedAsync(user)))
+
+                if (user != null && await _userManager.IsEmailConfirmedAsync(user))
                 {
-                    //  Display an error?  Do we want to do that?  Or just say "if email exists, it was sent"?
+                    string code = await _userManager.GeneratePasswordResetTokenAsync(user);
+                    var callbackUrl = Url.Action("ResetPassword", "Account",
+                new { userId = user.Id, code = code }, protocol: Request.Scheme);
+
+                    Trace.WriteLine("SENDING THE EMAIL");
+                    await new EmailService().SendEmailAsync();
+                   //"Confirm your account", "Please confirm your account by clicking <a href=\""
+                   //+ callbackUrl + "\">here</a>");
                 }
-
-                string code = await _userManager.GeneratePasswordResetTokenAsync(user);
-                var callbackUrl = Url.Action("ResetPassword", "Account",
-            new { userId = user.Id, code = code }, protocol: Request.Scheme);
-
-                await _userManager.ema(user,
-               "Confirm your account", "Please confirm your account by clicking <a href=\""
-               + callbackUrl + "\">here</a>");
             }
+
+            return View();
         }
 
 
