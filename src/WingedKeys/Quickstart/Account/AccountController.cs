@@ -13,7 +13,6 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using System;
-using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using WingedKeys.Models;
@@ -231,7 +230,7 @@ namespace IdentityServer4.Quickstart.UI
                 new { userId = user.Id, code = code }, protocol: Request.Scheme);
 
                     await new EmailService().SendEmailAsync(model.Email,
-                        "Please confirm your account by clicking <a href=\"" + callbackUrl + "\">here</a>");
+                        "Please confirm your account by clicking <a href=\"" + callbackUrl + "\">here</a>.");
                 }
             }
 
