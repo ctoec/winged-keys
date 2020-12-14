@@ -261,6 +261,9 @@ namespace IdentityServer4.Quickstart.UI
                     {
                         ModelState.TryAddModelError(error.Code, error.Description);
                     }
+                } else
+                {
+                    return View("ResetPasswordSuccess");
                 }
             }
 

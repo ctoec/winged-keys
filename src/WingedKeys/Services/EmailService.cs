@@ -1,5 +1,6 @@
 ﻿using SendGrid;
 using SendGrid.Helpers.Mail;
+using Microsoft.Extensions.Configuration;
 
 using System.Threading.Tasks;
 
@@ -7,8 +8,12 @@ namespace WingedKeys.Services
 {
     public class EmailService
     {
-        public EmailService()
+
+        private IConfiguration Configuration { get; }
+
+        public EmailService(IConfiguration configuration)
         {
+            Configuration = configuration;
         }
 
         public Task SendEmailAsync(string emailAddress, string subject, string htmlContent)
@@ -18,11 +23,9 @@ namespace WingedKeys.Services
 
         public Task Execute(string emailAddress, string subject, string htmlContent)
         {
-            //  TODO: PULL THIS API KEY OUTTA HERE, AND THEN CHANGE IT
-            var client = new SendGridClient("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");
-            var from = new EmailAddress("no-reply@ctoecskylight.com", "Connecticut Office of Early Childhood");
+            var client = new SendGridClient(Configuration.GetValue<string>("SendGridApiKey"));
+            var from = new EmailAddress(Configuration.GetValue<string>("SendGridEmail"), "Connecticut Office of Early Childhood");
             var to = new EmailAddress(emailAddress);
-
 
             var msg = MailHelper.CreateSingleEmail(from, to, subject, "", htmlContent);
 
