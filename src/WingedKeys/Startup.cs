@@ -19,7 +19,7 @@ namespace WingedKeys
 	public class Startup
 	{
 		public IWebHostEnvironment Environment { get; }
-		public IConfiguration Configuration { get; }
+		internal static IConfiguration Configuration;
 
 		private readonly string WingedKeysConnectionString;
 		private readonly string MigrationsAssembly;
@@ -27,7 +27,7 @@ namespace WingedKeys
 		public Startup(IWebHostEnvironment environment, IConfiguration configuration)
 		{
 			Environment = environment;
-			Configuration = configuration;
+			Startup.Configuration = configuration;
 
 			WingedKeysConnectionString = Configuration.GetConnectionString("WINGEDKEYS");
 			MigrationsAssembly = typeof(Startup).GetTypeInfo().Assembly.GetName().Name;
@@ -36,6 +36,7 @@ namespace WingedKeys
 		// This method gets called by the runtime. Use this method to add services to the container.
 		public void ConfigureServices(IServiceCollection services)
 		{
+
 			// CORS
 			services.AddCors(options =>
 			{
