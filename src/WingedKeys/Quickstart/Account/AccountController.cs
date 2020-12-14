@@ -105,7 +105,6 @@ namespace IdentityServer4.Quickstart.UI
 
             if (ModelState.IsValid)
             {
-
                 var result = await _signInManager.PasswordSignInAsync(model.Username, model.Password, model.RememberLogin, lockoutOnFailure: true);
                 if (result.Succeeded)
                 {
@@ -230,7 +229,7 @@ namespace IdentityServer4.Quickstart.UI
                     var callbackUrl = Url.Action(nameof(ResetPassword), "Account", new { email = user.Email, token = token }, protocol: Request.Scheme);
 
                     await new EmailService().SendEmailAsync(model.Email, "Password Reset Request",
-                        "Please confirm your account by clicking <a href=\"" + callbackUrl + "\">here</a>.");
+                        "Your password reset request has been received.  <a href=\"" + callbackUrl + "\">Click here to change your password.</a>");
                 }
 
                 //  Say an email was sent regardless (security through obscurity)
