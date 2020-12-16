@@ -102,6 +102,84 @@ namespace IdentityServer4.Quickstart.UI
 				}
 
 				[HttpGet]
+				public async Task<IActionResult> TriggerInitialLogin(
+					bool? success,
+					string emailSent
+				)
+				{
+
+						var vm = new TriggerInitialLoginViewModel();
+
+						vm.Success = success;
+						vm.EmailSent = email.sent;
+
+						return View(vm);
+				}
+
+				[HttpPost]
+				[ValidateAntiForgeryToken]
+				public async Task<IActionResult> TriggerInitialLogin(TriggerInitialLoginInputModel model, string button)
+				{
+					// the user clicked the "cancel" button
+					if (button != "create")
+					{
+						return Redirect("~/Admin/TriggerInitialLogin");
+					}
+
+					string error = null;
+					if (ModelState.IsValid)
+					{
+						var username = model.Username;
+						var user = await _userManager.FindByNameAsync(username);
+						if (user != null)
+						{
+							error = "User with username already exists";
+						}
+						else
+						{
+							user = new ApplicationUser
+							{
+								UserName = model.Username,
+								Email = model.Email,
+								EmailConfirmed = true
+							};
+							var result = _userManager.CreateAsync(user, model.Password).Result;
+							if (!result.Succeeded)
+							{
+								error = result.Errors.First().Description;
+							}
+							else
+							{
+								result = _userManager.AddClaimsAsync(user, new Claim[]{
+									new Claim(JwtClaimTypes.Name, model.GivenName + " " + model.FamilyName),
+									new Claim(JwtClaimTypes.GivenName, model.GivenName),
+									new Claim(JwtClaimTypes.FamilyName, model.FamilyName),
+									new Claim(JwtClaimTypes.Email, model.Email),
+									new Claim(JwtClaimTypes.EmailVerified, "true", ClaimValueTypes.Boolean)
+								}).Result;
+
+								if (!result.Succeeded)
+								{
+									error = result.Errors.First().Description;
+								}
+								else
+								{
+									return Redirect("~/Admin/NewAccount?success=true");
+								}
+							}
+						}
+					}
+					else
+					{
+						error = "Missing information. All fields are required";
+					}
+
+					// something went wrong, show form with error
+					var errorVm = BuildNewAccountViewModel(error);
+					return View(errorVm);
+				}
+
+				[HttpGet]
 				public IActionResult AccessDenied()
 				{
 					return View();
