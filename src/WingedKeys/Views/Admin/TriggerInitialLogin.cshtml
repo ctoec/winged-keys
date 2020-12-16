@@ -1,0 +1,48 @@
+@model TriggerInitialLoginViewModel
+
+<div>
+  <div class="page-header">
+      <h1>Trigger Initial Login</h1>
+  </div>
+  @if (Model.Success == true)
+  {
+    <div class="row">
+      <div class="col-sm-6">
+        <strong>Initial login email sent to "@Model.EmailSent". </strong>
+      </div>
+    </div>
+  }
+  @if (Model.Error != null)
+  {
+    <div class="row">
+      <div class="col-sm-6">
+        <strong>@(Model.Error)</strong>
+      </div>
+    </div>
+  }
+  <div class="row">
+    <div class="col-sm-6">
+      <div class="panel panel-default">
+        <div class="panel-heading">
+            <h3 class="panel-title">New account details</h3>
+        </div>
+        <div class="panel-body">
+          <form asp-route="NewAccount">
+            <div class="form-group">
+              <label asp-for="Username"></label>
+              <input class="form-control" placeholder="Username" asp-for="Username">
+            </div>
+            <div class="form-group">
+              <label asp-for="Email"></label>
+              <input class="form-control" placeholder="Email" asp-for="Email">
+            </div>
+            <div class="form-group">
+              <button class="btn btn-primary" name="button" value="create">Create</button>
+              <button class="btn btn-default" name="button" value="cancel">Cancel</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
