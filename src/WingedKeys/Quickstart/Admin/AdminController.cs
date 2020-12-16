@@ -102,13 +102,13 @@ namespace IdentityServer4.Quickstart.UI
 				}
 
 				[HttpGet]
-				public async Task<IActionResult> TriggerInitialLogin(
+				public async Task<IActionResult> InviteUser(
 					bool? success,
 					string emailSent
 				)
 				{
 
-						var vm = new TriggerInitialLoginViewModel();
+						var vm = new InviteUserViewModel();
 
 						vm.Success = success;
 						vm.EmailSent = email.sent;
@@ -118,12 +118,12 @@ namespace IdentityServer4.Quickstart.UI
 
 				[HttpPost]
 				[ValidateAntiForgeryToken]
-				public async Task<IActionResult> TriggerInitialLogin(TriggerInitialLoginInputModel model, string button)
+				public async Task<IActionResult> InviteUser(InviteUserInputModel model, string button)
 				{
 					// the user clicked the "cancel" button
 					if (button != "create")
 					{
-						return Redirect("~/Admin/TriggerInitialLogin");
+						return Redirect("~/Admin/InviteUser");
 					}
 
 					string error = null;
@@ -164,7 +164,7 @@ namespace IdentityServer4.Quickstart.UI
 								}
 								else
 								{
-									return Redirect("~/Admin/NewAccount?success=true");
+									return Redirect("~/Admin/InviteUser?success=true");
 								}
 							}
 						}
