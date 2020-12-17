@@ -122,10 +122,10 @@ namespace IdentityServer4.Quickstart.UI
 
 						if (user == null)
 						{
-							error = "No user found.";
+							error = "No user found for '" + model.Username + "'.";
 						} else if (await _userManager.IsEmailConfirmedAsync(user))
 						{
-							error = "User has not yet confirmed email.";
+							error = "User '" + model.Username + "' has not yet confirmed their email address.";
 						}
 						else
 						{
@@ -139,7 +139,7 @@ namespace IdentityServer4.Quickstart.UI
 					}
 					else
 					{
-						error = "Missing information. All fields are required";
+						error = "Username is required.";
 					}
 
 					return View(new InviteUserViewModel { Error = error });
