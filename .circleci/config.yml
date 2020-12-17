@@ -98,7 +98,6 @@ jobs:
           command: |
             cd src/WingedKeys
             jq -s '.[0] + .[1]' sendgrid.json appsettings.json > final_tmp.json && mv final_tmp.json appsettings.json
-            cat appsettings.json
       - run:
           name: 'Update Elastic Beanstalk Deploy Defaults'
           command: |
