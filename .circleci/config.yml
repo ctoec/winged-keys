@@ -89,6 +89,7 @@ jobs:
             # Remove from appsettings.json, as they will be replaced with the corresponding secrets pulled from AWS
             jq 'del(.AdminPassword)' appsettings.json > temp.json && mv temp.json appsettings.json
             jq 'del(.ConnectionStrings)' appsettings.json > temp.json && mv temp.json appsettings.json
+            jq 'del(.SendGridApiKey)' appsettings.json > temp.json && mv temp.json appsettings.json
       - run:
           name: Merge Appsettings Config with AWS Secrets
           command: |
