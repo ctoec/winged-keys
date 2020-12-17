@@ -260,15 +260,10 @@ namespace IdentityServer4.Quickstart.UI
 
             if (!resetPassResult.Succeeded)
             {
-                foreach (var error in resetPassResult.Errors)
-                {
-                    ModelState.TryAddModelError(error.Code, error.Description);
-                }
-                return View();
-            } else
-            {
-                return View("ResetPasswordSuccess");
+                return View(new ResetPasswordViewModel { Error = resetPassResult.Errors.First().Description });
             }
+
+            return View("ResetPasswordSuccess");
         }
 
         [HttpGet]
