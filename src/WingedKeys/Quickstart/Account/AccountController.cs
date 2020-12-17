@@ -240,7 +240,6 @@ namespace IdentityServer4.Quickstart.UI
         }
 
         [HttpGet]
-        [ValidateAntiForgeryToken]
         public IActionResult ResetPassword([FromQuery] string email, [FromQuery] string token)
         {
             return View(new ResetPasswordInputModel { Token = token, Email = email });
