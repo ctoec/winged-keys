@@ -2,10 +2,10 @@ using IdentityModel;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using System;
 using System.Linq;
 using System.Threading.Tasks;
 using WingedKeys.Models;
+using WingedKeys.Services;
 using System.Security.Claims;
 
 namespace IdentityServer4.Quickstart.UI
@@ -102,71 +102,39 @@ namespace IdentityServer4.Quickstart.UI
 				}
 
 				[HttpGet]
-				public async Task<IActionResult> InviteUser(
+				public IActionResult InviteUser(
 					bool? success,
-					string emailSent
+					string emailRecipient = null
 				)
 				{
-
-						var vm = new InviteUserViewModel();
-
-						vm.Success = success;
-						vm.EmailSent = email.sent;
-
-						return View(vm);
+					return View(new InviteUserViewModel { Success = success, EmailRecipient = emailRecipient });
 				}
 
 				[HttpPost]
 				[ValidateAntiForgeryToken]
-				public async Task<IActionResult> InviteUser(InviteUserInputModel model, string button)
+				public async Task<IActionResult> InviteUser(InviteUserInputModel model)
 				{
-					// the user clicked the "cancel" button
-					if (button != "create")
-					{
-						return Redirect("~/Admin/InviteUser");
-					}
+					string error;
 
-					string error = null;
 					if (ModelState.IsValid)
 					{
-						var username = model.Username;
-						var user = await _userManager.FindByNameAsync(username);
-						if (user != null)
+						var user = await _userManager.FindByNameAsync(model.Username);
+
+						if (user == null)
 						{
-							error = "User with username already exists";
+							error = "No user found.";
+						} else if (await _userManager.IsEmailConfirmedAsync(user))
+						{
+							error = "User has not yet confirmed email.";
 						}
 						else
 						{
-							user = new ApplicationUser
-							{
-								UserName = model.Username,
-								Email = model.Email,
-								EmailConfirmed = true
-							};
-							var result = _userManager.CreateAsync(user, model.Password).Result;
-							if (!result.Succeeded)
-							{
-								error = result.Errors.First().Description;
-							}
-							else
-							{
-								result = _userManager.AddClaimsAsync(user, new Claim[]{
-									new Claim(JwtClaimTypes.Name, model.GivenName + " " + model.FamilyName),
-									new Claim(JwtClaimTypes.GivenName, model.GivenName),
-									new Claim(JwtClaimTypes.FamilyName, model.FamilyName),
-									new Claim(JwtClaimTypes.Email, model.Email),
-									new Claim(JwtClaimTypes.EmailVerified, "true", ClaimValueTypes.Boolean)
-								}).Result;
+							string token = await _userManager.GeneratePasswordResetTokenAsync(user);
+							var callbackUrl = Url.Action("ResetPassword", "Account", new { email = user.Email, token = token }, protocol: Request.Scheme);
 
-								if (!result.Succeeded)
-								{
-									error = result.Errors.First().Description;
-								}
-								else
-								{
-									return Redirect("~/Admin/InviteUser?success=true");
-								}
-							}
+							await new EmailService().SendEmailAsync(user.Email, "Welcome to ECE Reporter!", BuildInviteUserEmail(callbackUrl));
+
+							return View(new InviteUserViewModel { Success = true, EmailRecipient = user.Email });
 						}
 					}
 					else
@@ -174,9 +142,7 @@ namespace IdentityServer4.Quickstart.UI
 						error = "Missing information. All fields are required";
 					}
 
-					// something went wrong, show form with error
-					var errorVm = BuildNewAccountViewModel(error);
-					return View(errorVm);
+					return View(new InviteUserViewModel { Error = error });
 				}
 
 				[HttpGet]
@@ -188,6 +154,11 @@ namespace IdentityServer4.Quickstart.UI
 				/*****************************************/
 				/* helper APIs for the AdminController */
 				/*****************************************/
+				private string BuildInviteUserEmail(string callbackUrl)
+				{
+					return "<h1>Welcome to ECE Reporter!</h1> <p>Good news - your account setup is nearly complete!  Once you update your password, you will be able to access the application.<br/><a href=\"" + callbackUrl + "\">Click here to set your password.</a></p>";
+				}
+
 				private NewAccountViewModel BuildNewAccountViewModel()
 				{
 					return new NewAccountViewModel();

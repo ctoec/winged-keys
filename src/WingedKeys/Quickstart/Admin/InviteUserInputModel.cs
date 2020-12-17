@@ -6,8 +6,5 @@ namespace IdentityServer4.Quickstart.UI
     {
         [Required]
         public string Username{ get; set; }
-
-        [Required]
-        public string Email { get; set; }
     }
 }
