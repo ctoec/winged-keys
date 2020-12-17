@@ -63,7 +63,6 @@ jobs:
             cd src/WingedKeys
             aws secretsmanager get-secret-value --secret-id /sendgrid/admin > sendgrid.json
             jq '.SecretString | fromjson' sendgrid.json > tmp.json && mv tmp.json sendgrid.json
-            cat sendgrid.json
       - aws-s3/copy:
           from: 's3://ece-wingedkeys-<< parameters.stage >>-store/secrets/server.pfx'
           to: src/WingedKeys/
@@ -100,7 +99,6 @@ jobs:
           command: |
             cd src/WingedKeys
             jq -s '.[0] + .[1]' sendgrid.json appsettings.json > final_tmp.json && mv final_tmp.json appsettings.json
-            cat appsettings.json
       - run:
           name: 'Update Elastic Beanstalk Deploy Defaults'
           command: |
