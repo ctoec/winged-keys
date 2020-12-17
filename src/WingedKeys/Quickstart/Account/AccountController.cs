@@ -219,53 +219,61 @@ namespace IdentityServer4.Quickstart.UI
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> ForgotPassword(ForgotPasswordInputModel model)
         {
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
-                var user = await _userManager.FindByEmailAsync(model.Email);
-
-                if (user != null && await _userManager.IsEmailConfirmedAsync(user))
-                {
-                    string token = await _userManager.GeneratePasswordResetTokenAsync(user);
-                    var callbackUrl = Url.Action(nameof(ResetPassword), "Account", new { email = user.Email, token = token }, protocol: Request.Scheme);
-
-                    await new EmailService().SendEmailAsync(model.Email, "Password Reset Request",
-                        "Your password reset request has been received.  <a href=\"" + callbackUrl + "\">Click here to change your password.</a>");
-                }
-
-                //  Say an email was sent regardless (security through obscurity)
-                return View(new ForgotPasswordViewModel { EmailSent = true });
+                return View(new ForgotPasswordViewModel { Error = "Email address required." });
             }
 
-            return View();
+            var user = await _userManager.FindByEmailAsync(model.Email);
+
+            if (user != null && await _userManager.IsEmailConfirmedAsync(user))
+            {
+                string token = await _userManager.GeneratePasswordResetTokenAsync(user);
+                var callbackUrl = Url.Action(nameof(ResetPassword), "Account", new { email = user.Email, token = token }, protocol: Request.Scheme);
+
+                await new EmailService().SendEmailAsync(model.Email, "Password Reset Request",
+                    "Your password reset request has been received.  <a href=\"" + callbackUrl + "\">Click here to change your password.</a>");
+            }
+
+            //  Say an email was sent regardless (security through obscurity)
+            return View(new ForgotPasswordViewModel { EmailSent = true });
         }
 
         [HttpGet]
         public IActionResult ResetPassword([FromQuery] string email, [FromQuery] string token)
         {
-            return View(new ResetPasswordInputModel { Token = token, Email = email });
+            return View(new ResetPasswordViewModel { Token = token, Email = email });
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> ResetPassword(ResetPasswordInputModel model)
         {
-            if (ModelState.IsValid)
-            {
-                var user = await _userManager.FindByEmailAsync(model.Email);
-                var resetPassResult = await _userManager.ResetPasswordAsync(user, model.Token, model.Password);
 
-                if (!resetPassResult.Succeeded)
-                {
-                    foreach (var error in resetPassResult.Errors)
-                    {
-                        ModelState.TryAddModelError(error.Code, error.Description);
-                    }
-                } else
-                {
-                    return View("ResetPasswordSuccess");
-                }
+            if (!ModelState.IsValid)
+            {
+                return View(new ResetPasswordViewModel { Error = "Password values must match" });
             }
 
+            var user = await _userManager.FindByEmailAsync(model.Email);
+            var resetPassResult = await _userManager.ResetPasswordAsync(user, model.Token, model.Password);
+
+            if (!resetPassResult.Succeeded)
+            {
+                foreach (var error in resetPassResult.Errors)
+                {
+                    ModelState.TryAddModelError(error.Code, error.Description);
+                }
+                return View();
+            } else
+            {
+                return View("ResetPasswordSuccess");
+            }
+        }
+
+        [HttpGet]
+        public IActionResult ResetPasswordSuccess()
+        {
             return View();
         }
 
