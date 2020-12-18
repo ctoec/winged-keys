@@ -57,6 +57,12 @@ jobs:
             jq '.SecretString | fromjson' secrets.json > tmp.json && mv tmp.json secrets.json
             jq '.ConnectionStrings={ WINGEDKEYS: ."ConnectionStrings.WINGEDKEYS" }' secrets.json > tmp.json && mv tmp.json secrets.json
             jq 'del(.["ConnectionStrings.WINGEDKEYS"])' secrets.json > tmp.json && mv tmp.json secrets.json
+      - run:
+          name: Download and Parse SendGrid Email API Key
+          command: |
+            cd src/WingedKeys
+            aws secretsmanager get-secret-value --secret-id /sendgrid/admin > sendgrid.json
+            jq '.SecretString | fromjson' sendgrid.json > tmp.json && mv tmp.json sendgrid.json
       - aws-s3/copy:
           from: 's3://ece-wingedkeys-<< parameters.stage >>-store/secrets/server.pfx'
           to: src/WingedKeys/
@@ -82,11 +88,17 @@ jobs:
             # Remove from appsettings.json, as they will be replaced with the corresponding secrets pulled from AWS
             jq 'del(.AdminPassword)' appsettings.json > temp.json && mv temp.json appsettings.json
             jq 'del(.ConnectionStrings)' appsettings.json > temp.json && mv temp.json appsettings.json
+            jq 'del(.SendGridApiKey)' appsettings.json > temp.json && mv temp.json appsettings.json
       - run:
           name: Merge Appsettings Config with AWS Secrets
           command: |
             cd src/WingedKeys
             jq -s '.[0] + .[1]' secrets.json appsettings.json > final_tmp.json && mv final_tmp.json appsettings.json
+      - run:
+          name: Merge Appsettings Config with SendGrid API Key
+          command: |
+            cd src/WingedKeys
+            jq -s '.[0] + .[1]' sendgrid.json appsettings.json > final_tmp.json && mv final_tmp.json appsettings.json
       - run:
           name: 'Update Elastic Beanstalk Deploy Defaults'
           command: |

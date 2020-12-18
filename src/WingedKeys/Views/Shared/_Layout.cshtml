@@ -44,6 +44,7 @@
                             @if (User.IsInRole("admin"))
                             {
                                 <li><a asp-action="NewAccount" asp-controller="Admin">Create User</a></li>
+                                <li><a asp-action="InviteUser" asp-controller="Admin">Invite User</a></li>
                             }
                             <li><a asp-action="Logout" asp-controller="Account">Log Out</a></li>
                         </ul>

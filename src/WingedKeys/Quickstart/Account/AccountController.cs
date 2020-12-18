@@ -16,6 +16,7 @@ using System;
 using System.Linq;
 using System.Threading.Tasks;
 using WingedKeys.Models;
+using WingedKeys.Services;
 
 namespace IdentityServer4.Quickstart.UI
 {
@@ -77,6 +78,7 @@ namespace IdentityServer4.Quickstart.UI
             // the user clicked the "cancel" button
             if (button != "login")
             {
+
                 if (context != null)
                 {
                     // if the user cancels, send a result back into IdentityServer as if they 
@@ -203,6 +205,85 @@ namespace IdentityServer4.Quickstart.UI
 
         [HttpGet]
         public IActionResult AccessDenied()
+        {
+            return View();
+        }
+
+        [HttpGet]
+        public IActionResult ForgotPassword()
+        {
+            return View(new ForgotPasswordViewModel{ });
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ForgotPassword(ForgotPasswordInputModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View(new ForgotPasswordViewModel { Error = "Email address required." });
+            }
+
+            var user = await _userManager.FindByEmailAsync(model.Email);
+
+            if (user != null && await _userManager.IsEmailConfirmedAsync(user))
+            {
+                string token = await _userManager.GeneratePasswordResetTokenAsync(user);
+                var callbackUrl = Url.Action(nameof(ResetPassword), "Account", new { email = user.Email, token = token }, protocol: Request.Scheme);
+
+                await new EmailService().SendEmailAsync(model.Email, "Password Reset Request",
+                    "Your password reset request has been received.  <a href=\"" + callbackUrl + "\">Click here to change your password.</a>");
+            }
+
+            //  Say an email was sent regardless (security through obscurity)
+            return View(new ForgotPasswordViewModel { EmailSent = true });
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> ResetPassword([FromQuery] string email, [FromQuery] string token)
+        {
+
+            if (email == null || token == null) {
+                return View("AccessDenied");
+            }
+
+            var user = await _userManager.FindByEmailAsync(email);
+
+            if (user == null) {
+                return View("AccessDenied");
+            }
+
+            if (!await _userManager.VerifyUserTokenAsync(user, _userManager.Options.Tokens.PasswordResetTokenProvider, "ResetPassword", token))
+            {
+                return View("AccessDenied");
+            }
+
+            return View(new ResetPasswordViewModel { Token = token, Email = email });
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ResetPassword(ResetPasswordInputModel model)
+        {
+
+            if (!ModelState.IsValid)
+            {
+                return View(new ResetPasswordViewModel { Error = "Password values must match" });
+            }
+
+            var user = await _userManager.FindByEmailAsync(model.Email);
+            var resetPassResult = await _userManager.ResetPasswordAsync(user, model.Token, model.Password);
+
+            if (!resetPassResult.Succeeded)
+            {
+                return View(new ResetPasswordViewModel { Error = resetPassResult.Errors.First().Description });
+            }
+
+            return View("ResetPasswordSuccess");
+        }
+
+        [HttpGet]
+        public IActionResult ResetPasswordSuccess()
         {
             return View();
         }

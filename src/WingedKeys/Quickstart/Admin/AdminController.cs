@@ -2,10 +2,10 @@ using IdentityModel;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using System;
 using System.Linq;
 using System.Threading.Tasks;
 using WingedKeys.Models;
+using WingedKeys.Services;
 using System.Security.Claims;
 
 namespace IdentityServer4.Quickstart.UI
@@ -102,6 +102,50 @@ namespace IdentityServer4.Quickstart.UI
 				}
 
 				[HttpGet]
+				public IActionResult InviteUser(
+					bool? success,
+					string emailRecipient = null
+				)
+				{
+					return View(new InviteUserViewModel { Success = success, EmailRecipient = emailRecipient });
+				}
+
+				[HttpPost]
+				[ValidateAntiForgeryToken]
+				public async Task<IActionResult> InviteUser(InviteUserInputModel model)
+				{
+					string error;
+
+					if (ModelState.IsValid)
+					{
+						var user = await _userManager.FindByNameAsync(model.Username);
+
+						if (user == null)
+						{
+							error = "No user found for '" + model.Username + "'.";
+						} else if (!await _userManager.IsEmailConfirmedAsync(user))
+						{
+							error = "User '" + model.Username + "' has not yet confirmed their email address.";
+						}
+						else
+						{
+							string token = await _userManager.GeneratePasswordResetTokenAsync(user);
+							var callbackUrl = Url.Action("ResetPassword", "Account", new { email = user.Email, token = token }, protocol: Request.Scheme);
+
+							await new EmailService().SendEmailAsync(user.Email, "Welcome to ECE Reporter!", BuildInviteUserEmail(callbackUrl));
+
+							return View(new InviteUserViewModel { Success = true, EmailRecipient = user.Email });
+						}
+					}
+					else
+					{
+						error = "Username is required.";
+					}
+
+					return View(new InviteUserViewModel { Error = error });
+				}
+
+				[HttpGet]
 				public IActionResult AccessDenied()
 				{
 					return View();
@@ -110,6 +154,11 @@ namespace IdentityServer4.Quickstart.UI
 				/*****************************************/
 				/* helper APIs for the AdminController */
 				/*****************************************/
+				private string BuildInviteUserEmail(string callbackUrl)
+				{
+					return "<h2>Welcome to ECE Reporter!</h2> <p>Good news - your new account setup is nearly complete!  Once you update your password, you will be able to access the application.<br/><br/><a href=\"" + callbackUrl + "\">Click here to set your password.</a></p>";
+				}
+
 				private NewAccountViewModel BuildNewAccountViewModel()
 				{
 					return new NewAccountViewModel();
