@@ -123,7 +123,7 @@ namespace IdentityServer4.Quickstart.UI
 						if (user == null)
 						{
 							error = "No user found for '" + model.Username + "'.";
-						} else if (await _userManager.IsEmailConfirmedAsync(user))
+						} else if (!await _userManager.IsEmailConfirmedAsync(user))
 						{
 							error = "User '" + model.Username + "' has not yet confirmed their email address.";
 						}
