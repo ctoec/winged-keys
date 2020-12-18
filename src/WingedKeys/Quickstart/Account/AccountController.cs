@@ -240,8 +240,24 @@ namespace IdentityServer4.Quickstart.UI
         }
 
         [HttpGet]
-        public IActionResult ResetPassword([FromQuery] string email, [FromQuery] string token)
+        public async Task<IActionResult> ResetPassword([FromQuery] string email, [FromQuery] string token)
         {
+
+            if (email == null || token == null) {
+                return View("AccessDenied");
+            }
+
+            var user = await _userManager.FindByEmailAsync(email);
+
+            if (user == null) {
+                return View("AccessDenied");
+            }
+
+            if (!await _userManager.VerifyUserTokenAsync(user, _userManager.Options.Tokens.PasswordResetTokenProvider, "ResetPassword", token))
+            {
+                return View("AccessDenied");
+            }
+
             return View(new ResetPasswordViewModel { Token = token, Email = email });
         }
 

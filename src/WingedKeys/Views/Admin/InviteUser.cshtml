@@ -6,7 +6,7 @@
   </div>
   @if (Model.Success == true)
   {
-    <div class="row alert alert-danger">
+    <div class="row">
       <div class="col-sm-6">
         <strong>Account invitation email sent to "@Model.EmailRecipient". </strong>
       </div>
@@ -14,7 +14,7 @@
   }
   @if (Model.Error != null)
   {
-    <div class="row">
+    <div class="row alert alert-danger">
       <div class="col-sm-6">
         <strong>@(Model.Error)</strong>
       </div>

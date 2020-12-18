@@ -156,7 +156,7 @@ namespace IdentityServer4.Quickstart.UI
 				/*****************************************/
 				private string BuildInviteUserEmail(string callbackUrl)
 				{
-					return "<h1>Welcome to ECE Reporter!</h1> <p>Good news - your account setup is nearly complete!  Once you update your password, you will be able to access the application.<br/><a href=\"" + callbackUrl + "\">Click here to set your password.</a></p>";
+					return "<h2>Welcome to ECE Reporter!</h2> <p>Good news - your new account setup is nearly complete!  Once you update your password, you will be able to access the application.<br/><br/><a href=\"" + callbackUrl + "\">Click here to set your password.</a></p>";
 				}
 
 				private NewAccountViewModel BuildNewAccountViewModel()
