@@ -111,11 +111,11 @@ namespace IdentityServer4.Quickstart.UI
                     var user = await _userManager.FindByNameAsync(model.Username);
                     await _events.RaiseAsync(new UserLoginSuccessEvent(user.UserName, user.Id, user.UserName, clientId: context?.ClientId));
 
-                    //  Force a redirect back to new ECE Reporter if a user reaches the login server independently of it
-                    if (string.IsNullOrEmpty(model.ReturnUrl))
-                    {
-                        model.ReturnUrl = (await _clientStore.FindClientByIdAsync("data-collection")).RedirectUris.First();
-                    }
+                    ////  Force a redirect back to new ECE Reporter if a user reaches the login server independently of it
+                    //if (string.IsNullOrEmpty(model.ReturnUrl))
+                    //{
+                    //    model.ReturnUrl = (await _clientStore.FindClientByIdAsync("data-collection")).RedirectUris.First();
+                    //}
 
                     if (context != null)
                     {
@@ -137,7 +137,7 @@ namespace IdentityServer4.Quickstart.UI
                     }
                     else if (string.IsNullOrEmpty(model.ReturnUrl))
                     {
-                        return Redirect("~/");
+                        return Redirect((await _clientStore.FindClientByIdAsync("data-collection")).RedirectUris.First());
                     }
                     else
                     {
