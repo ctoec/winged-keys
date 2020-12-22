@@ -137,7 +137,8 @@ namespace IdentityServer4.Quickstart.UI
                     }
                     else if (string.IsNullOrEmpty(model.ReturnUrl))
                     {
-                        return Redirect((await _clientStore.FindClientByIdAsync("data-collection")).RedirectUris.First());
+                        return Redirect("https://devsecure.ece-fawkes.ctoecskylight.com/login");
+                        //return Redirect((await _clientStore.FindClientByIdAsync("data-collection")).RedirectUris.First());
                     }
                     else
                     {
