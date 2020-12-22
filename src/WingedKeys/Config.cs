@@ -110,7 +110,7 @@ namespace WingedKeys
 				new Client
 				{
 					ClientId = "hedwig",
-					ClientName = "Hedwig Client",
+					ClientName = "ANOTHER TEST",
 					ClientUri = hedwigClientUri,
 
 					AllowedGrantTypes = GrantTypes.Code,
@@ -136,7 +136,7 @@ namespace WingedKeys
 				new Client
 				{
 					ClientId = "data-collection",
-					ClientName = "Data Collection Client",
+					ClientName = "TEST CLIENT NAME",
 					ClientUri = fawkesClientUri,
 
 					AllowedGrantTypes = GrantTypes.Code,
