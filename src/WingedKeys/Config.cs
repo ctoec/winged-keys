@@ -101,7 +101,7 @@ namespace WingedKeys
 			string fawkesClientUri = clientUris.Where(uri => uri.Contains("ece-reporter.ctoec.org")).FirstOrDefault();
 			if (fawkesClientUri == null)
             {
-				fawkesClientUri = "fawkesurl";
+				fawkesClientUri = clientUris.Where(uri => uri.Contains("fawkes")).FirstOrDefault();
 			}
 
 			return new List<Client>
@@ -110,7 +110,7 @@ namespace WingedKeys
 				new Client
 				{
 					ClientId = "hedwig",
-					ClientName = "ANOTHER TEST",
+					ClientName = "Hedwig Client",
 					ClientUri = hedwigClientUri,
 
 					AllowedGrantTypes = GrantTypes.Code,
@@ -136,7 +136,7 @@ namespace WingedKeys
 				new Client
 				{
 					ClientId = "data-collection",
-					ClientName = "TEST CLIENT NAME",
+					ClientName = "Data Collection Client",
 					ClientUri = fawkesClientUri,
 
 					AllowedGrantTypes = GrantTypes.Code,
