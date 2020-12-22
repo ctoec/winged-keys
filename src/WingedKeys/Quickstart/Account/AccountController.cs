@@ -131,7 +131,7 @@ namespace IdentityServer4.Quickstart.UI
                     }
                     else if (string.IsNullOrEmpty(model.ReturnUrl))
                     {
-                        return Redirect((await _clientStore.FindClientByIdAsync("data-collection")).ClientUri + "/login");
+                        return Redirect((await _clientStore.FindClientByIdAsync("data-collection")).PostLogoutRedirectUris.First() + "/login");
                     }
                     else
                     {
