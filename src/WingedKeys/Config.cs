@@ -101,7 +101,7 @@ namespace WingedKeys
 			string fawkesClientUri = clientUris.Where(uri => uri.Contains("ece-reporter.ctoec.org")).FirstOrDefault(null);
 			if (fawkesClientUri == null)
             {
-				fawkesClientUri = clientUris.Where(uri => uri.Contains("fawkes")).FirstOrDefault(null);
+				fawkesClientUri = "fawkesurl";
 			}
 
 			return new List<Client>
