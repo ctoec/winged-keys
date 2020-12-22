@@ -111,6 +111,12 @@ namespace IdentityServer4.Quickstart.UI
                     var user = await _userManager.FindByNameAsync(model.Username);
                     await _events.RaiseAsync(new UserLoginSuccessEvent(user.UserName, user.Id, user.UserName, clientId: context?.ClientId));
 
+                    //  Force a redirect back to new ECE Reporter if a user reaches the login server independently of it
+                    if (string.IsNullOrEmpty(model.ReturnUrl))
+                    {
+                        model.ReturnUrl = (await _clientStore.FindClientByIdAsync("data-collection")).RedirectUris.First();
+                    }
+
                     if (context != null)
                     {
                         if (await _clientStore.IsPkceClientAsync(context.ClientId))
