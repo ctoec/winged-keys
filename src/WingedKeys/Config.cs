@@ -92,13 +92,13 @@ namespace WingedKeys
 			var postLogoutRedirectUris = clientUris;
 			string[] redirectUris = clientUris.Select(uri => $"{uri}{redirectEndpoint}").ToArray();
 
-			string hedwigClientUri = clientUris.Where(uri => uri.Contains("reporter.ecereporterpilot.com")).ToArray().FirstOrDefault(null);
+			string hedwigClientUri = clientUris.Where(uri => uri.Contains("reporter.ecereporterpilot.com")).FirstOrDefault();
 			if (hedwigClientUri == null)
 			{
-				hedwigClientUri = clientUris.Where(uri => uri.Contains("hedwig")).ToArray().FirstOrDefault(null);
+				hedwigClientUri = clientUris.Where(uri => uri.Contains("hedwig")).FirstOrDefault();
 			}
 
-			string fawkesClientUri = clientUris.Where(uri => uri.Contains("ece-reporter.ctoec.org")).ToArray().FirstOrDefault(null);
+			string fawkesClientUri = clientUris.Where(uri => uri.Contains("ece-reporter.ctoec.org")).FirstOrDefault();
 			if (fawkesClientUri == null)
             {
 				fawkesClientUri = "fawkesurl";
