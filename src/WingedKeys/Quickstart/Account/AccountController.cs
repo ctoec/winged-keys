@@ -131,7 +131,9 @@ namespace IdentityServer4.Quickstart.UI
                     }
                     else if (string.IsNullOrEmpty(model.ReturnUrl))
                     {
-                        return Redirect("~/");
+                        //  HACK: Force redirect to ECE Reporter post-login if the user managed to get to our login server
+                        //  independent of the actual application (i.e. through the "Reset Password" workflow)
+                        return Redirect((await _clientStore.FindClientByIdAsync("data-collection")).ClientUri + "/login");
                     }
                     else
                     {
@@ -232,7 +234,7 @@ namespace IdentityServer4.Quickstart.UI
                 var callbackUrl = Url.Action(nameof(ResetPassword), "Account", new { email = user.Email, token = token }, protocol: Request.Scheme);
 
                 await new EmailService().SendEmailAsync(model.Email, "Password Reset Request",
-                    "Your password reset request has been received.  <a href=\"" + callbackUrl + "\">Click here to change your password.</a>");
+                    "Your password reset request has been received.  <a href=\"" + callbackUrl + "\">Click here to change your password.</a><br/><br/>Once you've successfully set your password, log into ECE Reporter at https://ece-reporter.ctoec.org/.");
             }
 
             //  Say an email was sent regardless (security through obscurity)

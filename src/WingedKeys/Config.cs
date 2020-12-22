@@ -92,6 +92,18 @@ namespace WingedKeys
 			var postLogoutRedirectUris = clientUris;
 			string[] redirectUris = clientUris.Select(uri => $"{uri}{redirectEndpoint}").ToArray();
 
+			string hedwigClientUri = clientUris.Where(uri => uri.Contains("reporter.ecereporterpilot.com")).FirstOrDefault();
+			if (hedwigClientUri == null)
+			{
+				hedwigClientUri = clientUris.Where(uri => uri.Contains("hedwig")).FirstOrDefault();
+			}
+
+			string fawkesClientUri = clientUris.Where(uri => uri.Contains("ece-reporter.ctoec.org")).FirstOrDefault();
+			if (fawkesClientUri == null)
+            {
+				fawkesClientUri = clientUris.Where(uri => uri.Contains("fawkes")).FirstOrDefault();
+			}
+
 			return new List<Client>
 			{
 				// Hedwig Client
@@ -99,6 +111,8 @@ namespace WingedKeys
 				{
 					ClientId = "hedwig",
 					ClientName = "Hedwig Client",
+					ClientUri = hedwigClientUri,
+
 					AllowedGrantTypes = GrantTypes.Code,
 					RequireClientSecret = false,
 					RequireConsent = false,
@@ -123,6 +137,8 @@ namespace WingedKeys
 				{
 					ClientId = "data-collection",
 					ClientName = "Data Collection Client",
+					ClientUri = fawkesClientUri,
+
 					AllowedGrantTypes = GrantTypes.Code,
 					RequireClientSecret = false,
 					RequireConsent = false,
