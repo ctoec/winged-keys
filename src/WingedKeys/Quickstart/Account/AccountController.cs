@@ -131,6 +131,8 @@ namespace IdentityServer4.Quickstart.UI
                     }
                     else if (string.IsNullOrEmpty(model.ReturnUrl))
                     {
+                        //  HACK: Force redirect to ECE Reporter post-login if the user managed to get to our login server
+                        //  independent of the actual application (i.e. through the "Reset Password" workflow)
                         return Redirect((await _clientStore.FindClientByIdAsync("data-collection")).ClientUri + "/login");
                     }
                     else
