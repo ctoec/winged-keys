@@ -2,19 +2,22 @@
 
 Winged Keys is our hand-rolled .NET application for authentication and identity management.  Based largely on .NET's [IdentityServer4](https://github.com/IdentityServer/IdentityServer4), it handles things like user sign-up, user sign-in and general access control across the rest of our OEC applications.
 
-## Development
+## Setup
 
 ### Local
-Local development on OSX right now isn't possible, as one of our dependencies (LocalDB) isn't currently supported on OSX.  For the time being, development from directly within Docker is probably your best bet.
+Local installation and development on OSX **isn't possible right now**, as one of our dependencies (LocalDB) isn't currently supported on OSX.  For the time being, development from directly within Docker is probably your best bet.
 
 ### Docker
+Getting local development set up with Docker is as easy you would think a Docker installation would be.
 
-1. Install [Docker](https://docs.docker.com/install/) (and maybe [Docker Compose](https://docs.docker.com/compose/install/), but it comes included with Docker Desktop for Mac).
+1. Install [Docker](https://docs.docker.com/install/).
+1. Install [Docker Compose](https://docs.docker.com/compose/install/) (if you haven't already - it comes included with Docker Desktop for Mac).
 
-1. Spin up the application!
+1. That's it!  Now you're ready to spin up the application.
     ```bash
     docker-compose up
     ```
+1. The application should be up and running at https://localhost:5050.
 
 ## User Setup
 With Winged-Keys being our IAM service, using it to get set up with account information and credentials to our various environments is a relatively simple process.
@@ -28,7 +31,4 @@ With Winged-Keys being our IAM service, using it to get set up with account info
 1. Congratulations!  The next time infrastructure is deployed to a particular environment, your user data will be included in that deploy.  Please note that this will be your account information **across environments**, so be sure to keep track of it.
 
 ## Deploy
-Deployment of all stages is currently handled through Azure DevOps release pipelines.
-
-### Cross-Origin Resource Sharing
-Whenever a new application is added to the OEC ECE ecosystem that requires authentication through winged-keys, that application's URL will need to be **manually added** to the `ClientUrls` environment variable in the corresponding Azure DevOps release pipelines across all applicable stages.  This will ensure winged-keys generates `Access-Control-Allow-Origin` headers to be attached to corresponding responses, necessary for actual access to winged-keys across domains.
+Deployment of all stages is currently handled through our [CircleCI deploy pipelines](https://app.circleci.com/pipelines/github/ctoec/winged-keys).
