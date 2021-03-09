@@ -12,7 +12,7 @@ Getting local development set up with Docker is as easy you would think a Docker
 
 1. Install [Docker](https://docs.docker.com/install/).
 1. Install [Docker Compose](https://docs.docker.com/compose/install/) (if you haven't already - it comes included with Docker Desktop for Mac).
-
+1. If you are developing on an M1/ARM system, you [may](https://github.com/microsoft/mssql-docker/issues/668) need to update the `image` of `db` in `docker-compose.yaml` to `mcr.microsoft.com/azure-sql-edge`.
 1. That's it!  Now you're ready to spin up the application.
     ```bash
     docker-compose up
@@ -27,8 +27,8 @@ With Winged-Keys being our IAM service, using it to get set up with account info
 1. Upon login, navigate to the account creation page (https://0.0.0.0:5050/Admin/NewAccount).
 1. Fill out all of the account details on the form within that page, and submit the form.
 1. Once created successfully, take a look at the `AspNetUsers` table in the winged-keys database in Docker.  You should see your newly created account details in there.
-1. Copy all of the applicable data points into the [Hedwig](https://github.com/skylight-hq/ctoec-devops/blob/master/sql/hedwig/setup_team_skylight_users_hedwig.sql) and [Winged Keys](https://github.com/skylight-hq/ctoec-devops/blob/master/sql/wingedkeys/setup_team_skylight_users_wingedkeys.sql) user setup SQL scripts in the `ctoec-devops` repo.
-1. Congratulations!  The next time infrastructure is deployed to a particular environment, your user data will be included in that deploy.  Please note that this will be your account information **across environments**, so be sure to keep track of it.
+
+We normally use the Harry Potter credentials, and in prod-like environments the corresponding password is in the AWS Secrets Manager. You can also use those credentials and this flow in all environments to create your own user directly through the UI now.
 
 ## Deploy
 Deployment of all stages is currently handled through our [CircleCI deploy pipelines](https://app.circleci.com/pipelines/github/ctoec/winged-keys).
