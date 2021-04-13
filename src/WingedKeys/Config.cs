@@ -40,25 +40,6 @@ namespace WingedKeys
 			{
 				new ApiResource
 				{
-					Name = "hedwig_backend",
-
-					Description = "Hedwig API",
-
-					// include the following using claims in access token (in addition to subject id)
-					UserClaims = { "role" },
-
-					Scopes =
-					{
-						new Scope()
-						{
-							Name = "hedwig_backend",
-							DisplayName = "Full access to Hedwig API",
-							UserClaims = new [] { "role", "allowed_apps" }
-						}
-					}
-				},
-				new ApiResource
-				{
 					Name = "data_collection_backend",
 
 					Description = "Data Collection API",
@@ -92,12 +73,6 @@ namespace WingedKeys
 			var postLogoutRedirectUris = clientUris;
 			string[] redirectUris = clientUris.Select(uri => $"{uri}{redirectEndpoint}").ToArray();
 
-			string hedwigClientUri = clientUris.Where(uri => uri.Contains("reporter.ecereporterpilot.com")).FirstOrDefault();
-			if (hedwigClientUri == null)
-			{
-				hedwigClientUri = clientUris.Where(uri => uri.Contains("hedwig")).FirstOrDefault();
-			}
-
 			string fawkesClientUri = clientUris.Where(uri => uri.Contains("ece-reporter.ctoec.org")).FirstOrDefault();
 			if (fawkesClientUri == null)
             {
@@ -106,32 +81,6 @@ namespace WingedKeys
 
 			return new List<Client>
 			{
-				// Hedwig Client
-				new Client
-				{
-					ClientId = "hedwig",
-					ClientName = "Hedwig Client",
-					ClientUri = hedwigClientUri,
-
-					AllowedGrantTypes = GrantTypes.Code,
-					RequireClientSecret = false,
-					RequireConsent = false,
-
-					RedirectUris =           redirectUris,
-					PostLogoutRedirectUris = postLogoutRedirectUris,
-					AllowedCorsOrigins =     allowedCorsOrigins,
-
-					AccessTokenLifetime = Int32.Parse(accessTokenLifetime),
-
-					AllowedScopes =
-					{
-						IdentityServerConstants.StandardScopes.OpenId,
-						IdentityServerConstants.StandardScopes.Profile,
-						"hedwig_backend"
-					},
-
-					AllowOfflineAccess = true,
-				},
 				// Data Collection Client
 				new Client
 				{
