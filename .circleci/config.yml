@@ -166,6 +166,14 @@ workflows:
           stage: qa
           requires:
             - hold
+  deploy-to-automation:
+    jobs:
+      - hold:
+          type: approval
+      - deploy:
+          stage: automation
+          requires:
+            - hold
   deploy-to-prod:
     jobs:
       - hold:
