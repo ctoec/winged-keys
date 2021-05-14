@@ -46,7 +46,7 @@ namespace WingedKeys
 					Description = "Data Collection API",
 
 					// include the following user claims in access token (in addition to subject id)
-					UserClaims = { "role" },
+					UserClaims = { "role", "email" },
 
 					Scopes =
 					{
