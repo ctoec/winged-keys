@@ -30,6 +30,7 @@ namespace WingedKeys
 			{
 				new IdentityResources.OpenId(),
 				new IdentityResources.Profile(),
+				new IdentityResources.Email(),
 			};
 		}
 
@@ -44,8 +45,8 @@ namespace WingedKeys
 
 					Description = "Data Collection API",
 
-					// include the following using claims in access token (in addition to subject id)
-					UserClaims = { "role" },
+					// include the following user claims in access token (in addition to subject id)
+					UserClaims = { "role", "email" },
 
 					Scopes =
 					{
@@ -102,6 +103,7 @@ namespace WingedKeys
 					{
 						IdentityServerConstants.StandardScopes.OpenId,
 						IdentityServerConstants.StandardScopes.Profile,
+						IdentityServerConstants.StandardScopes.Email,
 						"data_collection_backend"
 					},
 
