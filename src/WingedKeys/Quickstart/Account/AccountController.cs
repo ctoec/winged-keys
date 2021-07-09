@@ -143,7 +143,7 @@ namespace IdentityServer4.Quickstart.UI
 
             ViewData["ReturnUrl"] = returnUrl;
 
-            return View();
+            return View(new TwoFactorViewModel());
         }
 
         [HttpPost]
