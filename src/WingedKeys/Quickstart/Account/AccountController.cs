@@ -30,7 +30,6 @@ namespace IdentityServer4.Quickstart.UI
         private readonly IClientStore _clientStore;
         private readonly IAuthenticationSchemeProvider _schemeProvider;
         private readonly IEventService _events;
-        private readonly EmailService _emailService;
 
         public AccountController(
             UserManager<ApplicationUser> userManager,
@@ -38,8 +37,7 @@ namespace IdentityServer4.Quickstart.UI
             IIdentityServerInteractionService interaction,
             IClientStore clientStore,
             IAuthenticationSchemeProvider schemeProvider,
-            IEventService events,
-            EmailService emailService)
+            IEventService events)
         {
             _userManager = userManager;
             _signInManager = signInManager;
@@ -47,7 +45,6 @@ namespace IdentityServer4.Quickstart.UI
             _clientStore = clientStore;
             _schemeProvider = schemeProvider;
             _events = events;
-            _emailService = emailService;
         }
 
         /// <summary>
@@ -142,7 +139,7 @@ namespace IdentityServer4.Quickstart.UI
             }
 
             var token = await _userManager.GenerateTwoFactorTokenAsync(user, "Email");
-            await _emailService.SendEmailAsync(user.Email, "ECE Reporter Verification Code", "Your ECE Reporter verification code is " + token);
+            await new EmailService().SendEmailAsync(user.Email, "ECE Reporter Verification Code", "Your ECE Reporter verification code is " + token);
 
             ViewData["ReturnUrl"] = returnUrl;
 
