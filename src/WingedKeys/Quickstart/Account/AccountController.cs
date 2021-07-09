@@ -111,7 +111,10 @@ namespace IdentityServer4.Quickstart.UI
                 var result = await _signInManager.PasswordSignInAsync(model.Username, model.Password, model.RememberLogin, lockoutOnFailure: true);
                 if (result.Succeeded)
                 {
-                    return RedirectToAction(nameof(LoginTwoStep), new { model.Username, model.ReturnUrl });
+                    return await RedirectAfterLogin(context, model.Username, model.ReturnUrl);
+                } else if (result.RequiresTwoFactor)
+                {
+                    return RedirectToAction(nameof(ConfirmTwoFactorToken), new { model.Username, model.ReturnUrl });
                 }
 
                 await _events.RaiseAsync(new UserLoginFailureEvent(model.Username, "invalid credentials", clientId:context?.ClientId));
@@ -124,31 +127,35 @@ namespace IdentityServer4.Quickstart.UI
         }
 
         [HttpGet]
-        public async Task<IActionResult> LoginTwoStep(string userName, string returnUrl)
+        public async Task<IActionResult> ConfirmTwoFactorToken(string userName, string returnUrl)
         {
             var user = await _userManager.FindByNameAsync(userName);
             if (user == null)
             {
                 return View("Login", new LoginViewModel { Error = "We were unable to process your login.  Please try again." });
             }
+
             var providers = await _userManager.GetValidTwoFactorProvidersAsync(user);
             if (!providers.Contains("Email"))
             {
                 return View("Login", new LoginViewModel { Error = "Uh oh - looks like we've broken something.  Please contact support." });
             }
+
             var token = await _userManager.GenerateTwoFactorTokenAsync(user, "Email");
             await _emailService.SendEmailAsync(user.Email, "ECE Reporter Verification Code", "Your ECE Reporter verification code is " + token);
+
+            ViewData["ReturnUrl"] = returnUrl;
 
             return View();
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> LoginTwoStep(TwoFactorInputModel twoStepModel, string returnUrl)
+        public async Task<IActionResult> ConfirmTwoFactorToken(TwoFactorInputModel twoFactorModel, string returnUrl)
         {
             if (!ModelState.IsValid)
             {
-                return View(twoStepModel);
+                return View(twoFactorModel);
             }
 
             // check if we are in the context of an authorization request
@@ -159,10 +166,10 @@ namespace IdentityServer4.Quickstart.UI
             {
                 return RedirectToAction(nameof(Login));
             }
-            var result = await _signInManager.TwoFactorSignInAsync("Email", twoStepModel.TwoFactorCode, false, false);
+            var result = await _signInManager.TwoFactorSignInAsync("Email", twoFactorModel.TwoFactorCode, false, false);
             if (result.Succeeded)
             {
-                return await RedirectAfterLogin(context, returnUrl);
+                return await RedirectAfterLogin(context, user.UserName, returnUrl);
             }
             else if (result.IsLockedOut)
             {
@@ -319,9 +326,9 @@ namespace IdentityServer4.Quickstart.UI
         /*****************************************/
         /* helper APIs for the AccountController */
         /*****************************************/
-        private async Task<IActionResult> RedirectAfterLogin(AuthorizationRequest context, string returnUrl)
+        private async Task<IActionResult> RedirectAfterLogin(AuthorizationRequest context, string userName, string returnUrl)
         {
-            var user = await _userManager.FindByNameAsync(model.Username);
+            var user = await _userManager.FindByNameAsync(userName);
             await _events.RaiseAsync(new UserLoginSuccessEvent(user.UserName, user.Id, user.UserName, clientId: context?.ClientId));
 
             if (context != null)
