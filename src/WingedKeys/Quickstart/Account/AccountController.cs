@@ -30,6 +30,7 @@ namespace IdentityServer4.Quickstart.UI
         private readonly IClientStore _clientStore;
         private readonly IAuthenticationSchemeProvider _schemeProvider;
         private readonly IEventService _events;
+        private readonly TwoFactorService _twoFactorService;
 
         public AccountController(
             UserManager<ApplicationUser> userManager,
@@ -41,6 +42,7 @@ namespace IdentityServer4.Quickstart.UI
         {
             _userManager = userManager;
             _signInManager = signInManager;
+            _twoFactorService = new TwoFactorService(userManager, signInManager);
             _interaction = interaction;
             _clientStore = clientStore;
             _schemeProvider = schemeProvider;
@@ -111,7 +113,14 @@ namespace IdentityServer4.Quickstart.UI
                     return await RedirectAfterLogin(context, model.Username, model.ReturnUrl);
                 } else if (result.RequiresTwoFactor)
                 {
-                    return RedirectToAction(nameof(ConfirmTwoFactorToken), new { model.Username, model.ReturnUrl });
+                    try
+                    {
+                        await _twoFactorService.sendTwoFactorCode(model.Username);
+                        return RedirectToAction(nameof(ConfirmTwoFactorToken), new { model.ReturnUrl });
+                    } catch (Exception e)
+                    {
+                        return View("Login", new LoginViewModel { Error = "We were unable to process your login.  Please try again, or contact support if the issue persists." });
+                    }
                 }
 
                 await _events.RaiseAsync(new UserLoginFailureEvent(model.Username, "invalid credentials", clientId:context?.ClientId));
@@ -125,25 +134,9 @@ namespace IdentityServer4.Quickstart.UI
 
         [HttpGet]
         [Authorize]
-        public async Task<IActionResult> ConfirmTwoFactorToken(string userName, string returnUrl)
+        public IActionResult ConfirmTwoFactorToken(string returnUrl)
         {
-            var user = await _userManager.FindByNameAsync(userName);
-            if (user == null)
-            {
-                return View("Login", new LoginViewModel { Error = "We were unable to process your login.  Please try again." });
-            }
-
-            var providers = await _userManager.GetValidTwoFactorProvidersAsync(user);
-            if (!providers.Contains("Email"))
-            {
-                return View("Login", new LoginViewModel { Error = "Uh oh - looks like we've broken something.  Please contact support." });
-            }
-
-            var token = await _userManager.GenerateTwoFactorTokenAsync(user, "Email");
-            await new EmailService().SendEmailAsync(user.Email, "ECE Reporter Verification Code", "Your ECE Reporter verification code is " + token);
-
             ViewData["ReturnUrl"] = returnUrl;
-
             return View(new TwoFactorViewModel());
         }
 
