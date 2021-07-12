@@ -124,6 +124,7 @@ namespace IdentityServer4.Quickstart.UI
         }
 
         [HttpGet]
+        [Authorize]
         public async Task<IActionResult> ConfirmTwoFactorToken(string userName, string returnUrl)
         {
             var user = await _userManager.FindByNameAsync(userName);
