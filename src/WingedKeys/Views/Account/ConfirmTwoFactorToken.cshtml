@@ -15,10 +15,9 @@
 <p> Please enter your authentication code in the field below:</p>
 <div class="row">
     <div class="col-md-4">
-        <form asp-action="LoginTwoStep" asp-route-returnUrl="@ViewData["ReturnUrl"]">
-            <div asp-validation-summary="All" class="text-danger"></div>
+        <form asp-action="ConfirmTwoFactorToken" asp-route-returnUrl="@ViewData["ReturnUrl"]">
             <div class="form-group">
-                <label asp-for="TwoFactorCode" class="control-label"></label>
+                <label asp-for="TwoFactorCode" class="control-label">Authentication Code</label>
                 <input asp-for="TwoFactorCode" class="form-control" />
                 <span asp-validation-for="TwoFactorCode" class="text-danger"></span>
             </div>
