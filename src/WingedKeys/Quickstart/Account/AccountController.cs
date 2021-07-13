@@ -146,7 +146,8 @@ namespace IdentityServer4.Quickstart.UI
         {
             if (!ModelState.IsValid)
             {
-                return View(twoFactorModel);
+                var mfaViewModel = new TwoFactorViewModel { Error = "Please enter a valid confirmation code." };
+                return View(mfaViewModel);
             }
 
             // check if we are in the context of an authorization request
