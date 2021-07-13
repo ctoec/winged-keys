@@ -63,7 +63,8 @@ namespace IdentityServer4.Quickstart.UI
 							{
 								UserName = model.Username,
 								Email = model.Email,
-								EmailConfirmed = true
+								EmailConfirmed = true,
+								TwoFactorEnabled = true
 							};
 							var result = _userManager.CreateAsync(user, model.Password).Result;
 							if (!result.Succeeded)
