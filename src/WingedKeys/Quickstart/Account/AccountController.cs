@@ -30,6 +30,7 @@ namespace IdentityServer4.Quickstart.UI
         private readonly IClientStore _clientStore;
         private readonly IAuthenticationSchemeProvider _schemeProvider;
         private readonly IEventService _events;
+        private readonly TwoFactorService _twoFactorService;
 
         public AccountController(
             UserManager<ApplicationUser> userManager,
@@ -41,6 +42,7 @@ namespace IdentityServer4.Quickstart.UI
         {
             _userManager = userManager;
             _signInManager = signInManager;
+            _twoFactorService = new TwoFactorService(userManager, signInManager);
             _interaction = interaction;
             _clientStore = clientStore;
             _schemeProvider = schemeProvider;
@@ -106,40 +108,19 @@ namespace IdentityServer4.Quickstart.UI
             if (ModelState.IsValid)
             {
                 var result = await _signInManager.PasswordSignInAsync(model.Username, model.Password, model.RememberLogin, lockoutOnFailure: true);
-                if (result.Succeeded)
+                if (result.RequiresTwoFactor)
                 {
-                    var user = await _userManager.FindByNameAsync(model.Username);
-                    await _events.RaiseAsync(new UserLoginSuccessEvent(user.UserName, user.Id, user.UserName, clientId: context?.ClientId));
-
-                    if (context != null)
+                    try
                     {
-                        if (await _clientStore.IsPkceClientAsync(context.ClientId))
-                        {
-                            // if the client is PKCE then we assume it's native, so this change in how to
-                            // return the response is for better UX for the end user.
-                            return View("Redirect", new RedirectViewModel { RedirectUrl = model.ReturnUrl });
-                        }
-
-                        // we can trust model.ReturnUrl since GetAuthorizationContextAsync returned non-null
-                        return Redirect(model.ReturnUrl);
-                    }
-
-                    // request for a local page
-                    if (Url.IsLocalUrl(model.ReturnUrl))
+                        await _twoFactorService.sendTwoFactorCode(model.Username);
+                        return RedirectToAction(nameof(ConfirmTwoFactorToken), new { model.ReturnUrl });
+                    } catch (Exception e)
                     {
-                        return Redirect(model.ReturnUrl);
+                        return View("Login", new LoginViewModel { Error = "We were unable to process your login.  Please try again, or contact support if the issue persists." });
                     }
-                    else if (string.IsNullOrEmpty(model.ReturnUrl))
-                    {
-                        //  HACK: Force redirect to ECE Reporter post-login if the user managed to get to our login server
-                        //  independent of the actual application (i.e. through the "Reset Password" workflow)
-                        return Redirect((await _clientStore.FindClientByIdAsync("data-collection")).ClientUri + "/login");
-                    }
-                    else
-                    {
-                        // user might have clicked on a malicious link - should be logged
-                        throw new Exception("invalid return URL");
-                    }
+                } else if (result.Succeeded)
+                {
+                    return await RedirectAfterLogin(context, model.Username, model.ReturnUrl);
                 }
 
                 await _events.RaiseAsync(new UserLoginFailureEvent(model.Username, "invalid credentials", clientId:context?.ClientId));
@@ -151,7 +132,49 @@ namespace IdentityServer4.Quickstart.UI
             return View(vm);
         }
 
-        
+        [HttpGet]
+        [Authorize]
+        public IActionResult ConfirmTwoFactorToken(string returnUrl)
+        {
+            ViewData["ReturnUrl"] = returnUrl;
+            return View(new TwoFactorViewModel());
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ConfirmTwoFactorToken(TwoFactorInputModel twoFactorModel, string returnUrl)
+        {
+            if (!ModelState.IsValid)
+            {
+                var mfaViewModel = new TwoFactorViewModel { Error = "Please enter a valid confirmation code." };
+                return View(mfaViewModel);
+            }
+
+            // check if we are in the context of an authorization request
+            var context = await _interaction.GetAuthorizationContextAsync(returnUrl);
+
+            var user = await _signInManager.GetTwoFactorAuthenticationUserAsync();
+            if (user == null)
+            {
+                return RedirectToAction(nameof(Login));
+            }
+            var result = await _signInManager.TwoFactorSignInAsync("Email", twoFactorModel.TwoFactorCode, false, false);
+            if (result.IsLockedOut)
+            {
+                var mfaViewModel = new TwoFactorViewModel { Error = "Your account has been locked.  Please contact OEC support for assistance." }; ;
+                return View(mfaViewModel);
+            }
+            else if (!result.Succeeded)
+            {
+                var mfaViewModel = new TwoFactorViewModel { Error = "Invalid confirmation code." };
+                return View(mfaViewModel);
+            } else
+            {
+                return await RedirectAfterLogin(context, user.UserName, returnUrl);
+            }
+        }
+
+
         /// <summary>
         /// Show logout page
         /// </summary>
@@ -294,6 +317,43 @@ namespace IdentityServer4.Quickstart.UI
         /*****************************************/
         /* helper APIs for the AccountController */
         /*****************************************/
+        private async Task<IActionResult> RedirectAfterLogin(AuthorizationRequest context, string userName, string returnUrl)
+        {
+            var user = await _userManager.FindByNameAsync(userName);
+            await _events.RaiseAsync(new UserLoginSuccessEvent(user.UserName, user.Id, user.UserName, clientId: context?.ClientId));
+
+            if (context != null)
+            {
+                if (await _clientStore.IsPkceClientAsync(context.ClientId))
+                {
+                    // if the client is PKCE then we assume it's native, so this change in how to
+                    // return the response is for better UX for the end user.
+                    return View("Redirect", new RedirectViewModel { RedirectUrl = returnUrl });
+                }
+
+                // we can trust model.ReturnUrl since GetAuthorizationContextAsync returned non-null
+                return Redirect(returnUrl);
+            }
+
+            // request for a local page
+            if (Url.IsLocalUrl(returnUrl))
+            {
+                return Redirect(returnUrl);
+            }
+            else if (string.IsNullOrEmpty(returnUrl))
+            {
+                //  HACK: Force redirect to ECE Reporter post-login if the user managed to get to our login server
+                //  independent of the actual application (i.e. through the "Reset Password" workflow)
+                return Redirect((await _clientStore.FindClientByIdAsync("data-collection")).ClientUri + "/login");
+            }
+            else
+            {
+                // user might have clicked on a malicious link - should be logged
+                throw new Exception("invalid return URL");
+            }
+        }
+
+
         private async Task<LoginViewModel> BuildLoginViewModelAsync(string returnUrl)
         {
             var context = await _interaction.GetAuthorizationContextAsync(returnUrl);
