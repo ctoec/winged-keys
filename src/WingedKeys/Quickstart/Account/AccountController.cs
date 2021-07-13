@@ -108,10 +108,7 @@ namespace IdentityServer4.Quickstart.UI
             if (ModelState.IsValid)
             {
                 var result = await _signInManager.PasswordSignInAsync(model.Username, model.Password, model.RememberLogin, lockoutOnFailure: true);
-                if (result.Succeeded)
-                {
-                    return await RedirectAfterLogin(context, model.Username, model.ReturnUrl);
-                } else if (result.RequiresTwoFactor)
+                if (result.RequiresTwoFactor)
                 {
                     try
                     {
@@ -121,6 +118,9 @@ namespace IdentityServer4.Quickstart.UI
                     {
                         return View("Login", new LoginViewModel { Error = "We were unable to process your login.  Please try again, or contact support if the issue persists." });
                     }
+                } else if (result.Succeeded)
+                {
+                    return await RedirectAfterLogin(context, model.Username, model.ReturnUrl);
                 }
 
                 await _events.RaiseAsync(new UserLoginFailureEvent(model.Username, "invalid credentials", clientId:context?.ClientId));
@@ -158,19 +158,18 @@ namespace IdentityServer4.Quickstart.UI
                 return RedirectToAction(nameof(Login));
             }
             var result = await _signInManager.TwoFactorSignInAsync("Email", twoFactorModel.TwoFactorCode, false, false);
-            if (result.Succeeded)
-            {
-                return await RedirectAfterLogin(context, user.UserName, returnUrl);
-            }
-            else if (result.IsLockedOut)
+            if (result.IsLockedOut)
             {
                 var mfaViewModel = new TwoFactorViewModel { Error = "Your account has been locked.  Please contact OEC support for assistance." }; ;
                 return View(mfaViewModel);
             }
-            else
+            else if (!result.Succeeded)
             {
                 var mfaViewModel = new TwoFactorViewModel { Error = "Invalid confirmation code." };
                 return View(mfaViewModel);
+            } else
+            {
+                return await RedirectAfterLogin(context, user.UserName, returnUrl);
             }
         }
 
